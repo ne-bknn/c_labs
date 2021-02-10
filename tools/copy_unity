@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -Eeuo pipefail
-
-cp ~/Projects/Unity/src/unity.h .
-cp ~/Projects/Unity/src/unity.c .
-cp ~/Projects/Unity/src/unity_internals.h .
