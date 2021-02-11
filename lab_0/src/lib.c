@@ -125,4 +125,33 @@ void print_tuple_list(tuple_list* pTupleList) {
 	for (iter = tuple_list_start(pTupleList); iter != tuple_list_end(pTupleList); ++iter) {
 		printf("[%d %d] ", iter->a, iter->b);
 	}
+	printf("\n");
+}
+
+// Custom sorting 
+// SWAP macro stolen from qsort's source
+
+#define SWAP(a, b, size)                                                      \
+  do                                                                              \
+    {                                                                              \
+      size_t __size = (size);                                                      \
+      char *__a = (a), *__b = (b);                                              \
+      do                                                                      \
+        {                                                                      \
+          char __tmp = *__a;                                                      \
+          *__a++ = *__b;                                                      \
+          *__b++ = __tmp;                                                      \
+        } while (--__size > 0);                                                      \
+    } while (0)
+
+void bubble_sort_tuple_list(tuple_list* pTupleList) {
+	struct Tuple* base_pointer = tuple_list_start(pTupleList);
+	int length = pTupleList->length;
+	for (int i = 0; i < length - 1; ++i) {
+		for (int j = 0; j < length - i - 1; ++j) {
+			if ((base_pointer+j)->a > (base_pointer+j+1)->a) {
+				SWAP ((void*)(base_pointer+j), (void*)(base_pointer+j+1), sizeof(struct Tuple));
+			}
+		}
+	}
 }

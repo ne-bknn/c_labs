@@ -31,6 +31,5 @@ int add_tuple_to_list(tuple_list* pTupleList, struct Tuple tuple);
 struct Tuple* tuple_list_start(tuple_list* pTupleList);
 struct Tuple* tuple_list_end(tuple_list* pTupleList);
 void print_tuple_list(tuple_list* pTupleList);
-void sort_tuples(tuple_list* pTupleList);
-
+void bubble_sort_tuple_list(tuple_list* pTupleList);
 #endif
