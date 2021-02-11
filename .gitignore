@@ -53,3 +53,4 @@ dkms.conf
 
 # Autotests are python-generated
 __pycache__/
+fuzzing/

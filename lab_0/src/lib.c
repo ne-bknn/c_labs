@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include "lib.h"
 #include <stdlib.h>
+
+#include "lib.h"
 
 void print_warning(char msg[]) {
 	fprintf(stderr, "[-] %s\n", msg);
