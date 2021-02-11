@@ -4,7 +4,12 @@
 #include "lib.h"
 
 int main() {
+	int status_code;
 	tuple_list* Tuples = create_tuple_list(5);
+	if (NULL == Tuples) {
+		print_error("Could not allocate memory!");
+		exit(1);
+	}
 	int input;
 	// Do-while may be used but I think it's ugly
 	printf("Enter your number: ");
@@ -14,7 +19,11 @@ int main() {
 			continue;
 		}
 		struct Tuple pair = multiply_and_count(input);
-		add_tuple_to_list(Tuples, pair);
+		status_code = add_tuple_to_list(Tuples, pair);
+		if (0 == status_code) {
+			print_error("Could not reallocate memory!");
+			exit(1);
+		}
 		printf("Successfully added your number, press Ctrl-D to finish.\nNumbers entered: %lu\n", Tuples->length);
 		printf("Enter your number: ");
 	}

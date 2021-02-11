@@ -55,3 +55,4 @@ dkms.conf
 __pycache__/
 fuzzing/
 logs/
+tags
