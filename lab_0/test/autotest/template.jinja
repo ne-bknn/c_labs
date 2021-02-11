@@ -1,0 +1,24 @@
+#include "../vendor/unity.h"
+#include "../../src/lib.h"
+
+void setUp(void) {
+}
+
+void tearDown(void) {
+}
+
+{% for item in tests %}
+static void test_{{item.i}}(void) {
+	struct Tuple answer = {% raw %}{{% endraw %}{{item.a}}, {{item.b}}{% raw %}}{% endraw %}; 
+	struct Tuple func_result = multiply_and_count({{item.x}});
+	TEST_ASSERT_MESSAGE(tuples_eq(&func_result, &answer), "Fail at {{item.x}}");
+}
+{% endfor %}
+
+int main(void) {
+	UNITY_BEGIN();
+	{% for item in tests %}
+	RUN_TEST(test_{{item.i}});
+	{% endfor %}
+	return UNITY_END();
+}

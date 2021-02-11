@@ -20,6 +20,10 @@ default: build
 test: tests.out
 	@./tests.out
 
+.PHONY: autotest
+autotest: autotests.out
+	@./autotests.out
+
 .PHONY: memcheck
 memcheck: test/*.c src/*.c src/*.h
 	@echo Running memcheck
@@ -31,6 +35,14 @@ tests.out: test/*.c src/*.h
 	@echo Building tests 
 	@$(CC) $(CFLAGS) src/*lib.c src/*.h test/vendor/unity.c test/*.c -o tests.out $(LIBS)
 
+test/autotest/autotest.c: test/autotest/generate_test.py test/autotest/template.jinja
+	@echo Generating autotest.c
+	cd test/autotest && python generate_test.py
+
+autotests.out: test/autotest/autotest.c
+	@echo Compiling autotest.c
+	@$(CC) $(CFLAGS) src/*lib.c src/*.h test/vendor/unity.c test/autotest/*.c -o autotests.out $(LIBS)
+
 .PHONY: build
 build: src/*.c src/*.h
 	@echo Building
@@ -38,6 +50,7 @@ build: src/*.c src/*.h
 
 .PHONY: clean
 clean:
-	@echo Deleting *.out *.o
+	@echo Deleting *.out *.o autotests
 	-@rm *.out 2>/dev/null || true
 	-@rm *.o 2>/dev/null || true
+	-@rm test/autotest/autotest.c 2>/dev/null || true
