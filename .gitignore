@@ -51,6 +51,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# Autotests are python-generated
+# custom gitignores
 __pycache__/
 fuzzing/
+logs/

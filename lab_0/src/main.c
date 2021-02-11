@@ -21,8 +21,9 @@ int main() {
 	printf("\nOriginal sequence:\n");
 	print_tuple_list(Tuples);
 	printf("\nSorted sequence:\n");
-	// qsort(Tuples->tuples, Tuples->length, sizeof(struct Tuple), tuple_comparator);
-	bubble_sort_tuple_list(Tuples);
+	qsort(Tuples->tuples, Tuples->length, sizeof(struct Tuple), tuple_comparator);
+	// bubble_sort_tuple_list(Tuples);
 	print_tuple_list(Tuples);
+	delete_tuple_list(Tuples);
 	return 0;
 }

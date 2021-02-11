@@ -23,7 +23,7 @@ int get_int(int* a) {
 		}
 	}
 	// Dont get it
-	// What is to be done for n to be
+	// What is to be done for n to be < 0
 	//
 	// Ah got it, Ctrl-D
 	return n < 0 ? 0 : 1;
@@ -131,6 +131,7 @@ void print_tuple_list(tuple_list* pTupleList) {
 
 // Custom sorting 
 // SWAP macro stolen from qsort's source
+// Why char is used? Why is it a macro?
 
 #define SWAP(a, b, size)                                                      \
   do                                                                              \

@@ -54,3 +54,9 @@ clean:
 	-@rm *.out 2>/dev/null || true
 	-@rm *.o 2>/dev/null || true
 	-@rm test/autotest/autotest.c 2>/dev/null || true
+
+.PHONY: valgrind
+valgrind: task.out
+	cat test/testcases/testcase1 | valgrind --leak-check=full \
+         --show-leak-kinds=all --track-origins=yes --verbose \
+         --log-file=logs/valgrind-out.txt ./task.out
