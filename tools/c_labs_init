@@ -2,4 +2,4 @@
 
 set -Eeuo pipefail
 
-cp -r ~/Projects/c_labs/reference/* .
+cp -r ../reference/* .
