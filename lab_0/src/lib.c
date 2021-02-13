@@ -19,13 +19,8 @@ int get_int(int* a) {
 		if (n == 0) {
 			print_warning("Error reading integer value");
 			scanf("%*[^\n]");
-			scanf("%*c");
 		}
 	}
-	// Dont get it
-	// What is to be done for n to be < 0
-	//
-	// Ah got it, Ctrl-D
 	return n < 0 ? 0 : 1;
 }
 

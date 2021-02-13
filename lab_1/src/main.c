@@ -28,6 +28,7 @@ int main() {
 		}
 		add_row_to_matrix(pmatrix, row, i);
 	}
+	print_matrix(pmatrix);
 	delete_matrix(pmatrix);
 	return 0;	
 }

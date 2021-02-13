@@ -59,6 +59,6 @@ clean:
 
 .PHONY: valgrind
 valgrind: task.out
-	cat test/testcases/testcase1 | valgrind --leak-check=full \
+	cat test/cases/01_testcase | valgrind --leak-check=full \
          --show-leak-kinds=all --track-origins=yes --verbose \
          --log-file=logs/valgrind-out.txt ./task.out

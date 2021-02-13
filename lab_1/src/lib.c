@@ -3,12 +3,12 @@
 #include <stdlib.h>
 
 struct Row* create_row(size_t len) {
-	struct Row* prow = malloc(sizeof(struct Row*));
+	struct Row* prow = malloc(sizeof(struct Row));
 	if (NULL == prow) {
 		return NULL;
 	}
 	prow->length = len;
-	prow->numbers = malloc(sizeof(double)*len);
+	prow->numbers = calloc(len, sizeof(double));
 	if (NULL == prow->numbers) {
 		free(prow);
 		return NULL;
@@ -30,10 +30,28 @@ struct Matrix* create_matrix(size_t len) {
 	return pmatrix;
 }
 
+void print_matrix(struct Matrix* pmatrix) {
+	for (size_t i = 0; i < pmatrix->length; ++i) {
+		struct Row* iter = pmatrix->rows[i];
+		for (size_t j = 0; j < iter->length; ++j) {
+			printf("%-12lf ", iter->numbers[j]);
+		}
+		printf("\n");
+	}
+}
+
 void delete_matrix(struct Matrix* pmatrix) {
-	struct Row* iter;
-	for (iter = pmatrix->rows; iter != pmatrix->rows[pmatrix->length]; ++iter) {
+	// add previous version of the code
+	// with incrementing pointer
+	// have no idea why this version works
+	// and that did not
+	for (size_t i = 0; i < pmatrix->length; ++i) {
+		struct Row* iter = pmatrix->rows[i];	
 		free(iter->numbers);
+		// freed malloced numbers array, forgot that
+		// struct is allocated on the heap too
+		// spent half and hour debugging. bruh.
+		free(iter);
 	}
 	free(pmatrix->rows);
 	free(pmatrix);
