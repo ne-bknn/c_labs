@@ -46,7 +46,7 @@ autotests.out: test/autotest/autotest.c
 .PHONY: build
 build: src/*.c src/*.h
 	@echo Building
-	@$(CC) $(CFLAGS) src/*.c -o task.out $(LIBS) 
+	@$(CC) $(CFLAGS) src/*.c -g -o task.out $(LIBS) 
 
 task.out: build
 
@@ -59,6 +59,6 @@ clean:
 
 .PHONY: valgrind
 valgrind: task.out
-	cat test/cases/01_testcase | valgrind --leak-check=full \
+	cat test/cases/04_t | valgrind --leak-check=full \
          --show-leak-kinds=all --track-origins=yes --verbose \
          --log-file=logs/valgrind-out.txt ./task.out
