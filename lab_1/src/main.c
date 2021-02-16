@@ -4,26 +4,41 @@
 
 int main() {
 	// m - rows, n - columns
-	int n, m;
+	int n, m, status;
 	get_int(&m);
 	get_int(&n);
 	
 	struct Matrix* pmatrix = create_matrix(m, n);
 	if (NULL == pmatrix) {
-		print_error("Could  not allocate memory");
+		print_error("Failed to create matrix.");
 		exit(1);
 	}
 	int temp;
+	int len = -1;
 	for (int i = 0; i < m; ++i) {
-		int len;
-		get_int(&len);
+		while (len < 0 || len > n) {
+			status = get_int(&len);
+			if (status == 0) {
+				print_error("Received unexpected EOF");
+				exit(1);
+			}
+
+			if (len > n || len < 0) {
+				print_error("Failed reading row length, repeat");
+			}
+		}
 		struct Row* row = create_row(len);
 		if (NULL == row) {
-			print_error("Could not allocate memory");
+			print_error("Failed to create row");
 			exit(1);
 		}
 		for (int j = 0; j < len; ++j) {
-			get_int(&temp);
+			status = get_int(&temp);
+			if (status == 0) {
+				print_error("Reiceved unexpected EOF");
+				exit(1);
+			}
+
 			row->numbers[j] = (double) temp;
 			if (temp < 0) {
 				row->n_negative++;
@@ -37,7 +52,7 @@ int main() {
 	print_matrix(pmatrix);
 	struct Row *pneg, *ppos;
 	get_min_max(pmatrix, &pneg, &ppos);
-	swap(pmatrix, &pneg, &ppos);
+	// swap(pmatrix, &pneg, &ppos);
 	printf("===============================\n");
 	print_matrix(pmatrix);
 	delete_matrix(pmatrix);

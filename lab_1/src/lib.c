@@ -3,6 +3,9 @@
 #include <stdlib.h>
 
 struct Row* create_row(size_t len) {
+	if (len == 0) {
+		return NULL;
+	}
 	struct Row* prow = malloc(sizeof(struct Row));
 	if (NULL == prow) {
 		return NULL;
@@ -19,6 +22,9 @@ struct Row* create_row(size_t len) {
 }
 
 struct Matrix* create_matrix(size_t len, size_t n_columns) {
+	if ((len < 1) || (n_columns < 1)) {
+		return NULL;
+	}
 	struct Matrix* pmatrix = malloc(sizeof(struct Matrix));
 	if (NULL == pmatrix) {
 		return NULL;
@@ -59,7 +65,6 @@ void delete_matrix(struct Matrix* pmatrix) {
 		free(iter->numbers);
 		free(iter);
 	}
-	free(pmatrix->rows);
 	free(pmatrix);
 }
 
