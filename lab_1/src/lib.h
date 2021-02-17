@@ -34,4 +34,5 @@ void print_matrix(struct Matrix* pmatrix);
 int get_double(double* a);
 void get_min_max(struct Matrix *pmatrix, int *index_neg_max, int *index_pos_max);
 void swap(struct Matrix *pmatrix, int index_neg_max, int index_pos_max);
+void print_pointers(struct Matrix* pmatrix);
 #endif

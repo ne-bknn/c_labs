@@ -79,8 +79,7 @@ int get_int(int* a) {
 	int n = 0;
 	while (n == 0) {
 		n = scanf("%d", a);
-		if (n == 0) {
-			print_warning("Error reading integer value");
+		if (n == 0) { print_warning("Error reading integer value");
 			scanf("%*[^\n]");
 		}
 	}
@@ -105,12 +104,14 @@ void get_min_max(struct Matrix *pmatrix, int *index_neg_max, int *index_pos_max)
 	for (size_t i = 0; i < pmatrix->length; ++i) {
 		// rows dereferenced once - got Row*
 		if (pmatrix->rows[i]->n_positive >= max_positive) {
+			print_debug("pmatrix->rows[i]->n_positive is %d; max_positive is %d\n", pmatrix->rows[i]->n_positive, max_positive);
 			max_positive = pmatrix->rows[i]->n_positive;
-			*index_neg_max = i;
+			*index_pos_max = i;
 		}
 		if (pmatrix->rows[i]->n_negative >= max_negative) {
+			print_debug("pmatrix->rows[i]->n_negativeis %d; max_negativeis %d\n", pmatrix->rows[i]->n_negative, max_positive);
 			max_negative = pmatrix->rows[i]->n_negative;
-			*index_pos_max = i;
+			*index_neg_max= i;
 		}
 	}
 	print_debug("*ppos: %d\n", *index_pos_max);
@@ -118,18 +119,36 @@ void get_min_max(struct Matrix *pmatrix, int *index_neg_max, int *index_pos_max)
 }
 
 void swap(struct Matrix *pmatrix, int index_pos_max, int index_neg_max) {
+	print_debug("MAtrix length: %zu\n", pmatrix->length);
 	struct Row *temp;
-	temp = pmatrix->rows[0]+sizeof(struct Row*)*index_pos_max;
+	// now there is a pointer to needed row
+	temp = pmatrix->rows[index_pos_max];
+	print_debug("index_pos_max: %d\n", index_pos_max);
+	print_debug("temp pointer: %p\n", (void*)temp);
+	// this does not work?????
 	pmatrix->rows[index_pos_max] = pmatrix->rows[0];
+	print_debug("%d\n", index_neg_max);
 	pmatrix->rows[0] = temp;
-
-	temp = pmatrix->rows[0]+sizeof(struct Row*)*index_neg_max;
-	pmatrix->rows[index_neg_max] = pmatrix->rows[pmatrix->length];
-	pmatrix->rows[pmatrix->length] = temp;
+	// lol this works alright
+	//
+	//
+	// time for this part
+	temp = pmatrix->rows[index_neg_max];
+	print_debug("index_neg_max: %d\n", index_neg_max);
+	print_debug("temp pointer: %p\n", (void*)temp);
+	pmatrix->rows[index_neg_max] = pmatrix->rows[pmatrix->length-1];
+	pmatrix->rows[pmatrix->length-1] = temp;
 }
 
 void print_warning(char msg[]) {
 	fprintf(stderr, "[-] %s\n", msg);
+}
+
+void print_pointers(struct Matrix* pmatrix) {
+	for (size_t i = 0; i < pmatrix->length; ++i) {
+		print_debug("%p ", (void*)pmatrix->rows[i]);
+	}
+	printf("\n");
 }
 
 void print_error(char msg[]) {

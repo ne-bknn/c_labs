@@ -15,7 +15,7 @@ int main() {
 		print_error("Failed to create matrix.");
 		exit(1);
 	}
-	int temp;
+	double temp;
 	int len = -1;
 	for (int i = 0; i < m; ++i) {
 		status = get_int(&len);
@@ -35,13 +35,13 @@ int main() {
 			exit(1);
 		}
 		for (int j = 0; j < len; ++j) {
-			status = get_int(&temp);
+			status = get_double(&temp);
 			if (status == 0) {
-				print_error("Reiceved unexpected EOF");
+				print_error("Recieved unexpected EOF");
 				exit(1);
 			}
 
-			row->numbers[j] = (double) temp;
+			row->numbers[j] = temp;
 			if (temp < 0) {
 				row->n_negative++;
 			}
@@ -53,11 +53,13 @@ int main() {
 	}
 
 	print_matrix(pmatrix);
+	print_pointers(pmatrix);
 	int index_neg_max = 0, index_pos_max = 0;
 	get_min_max(pmatrix, &index_neg_max, &index_pos_max);
 	print_debug("index_neg_max in main: %d\n", index_neg_max);
 	print_debug("index_pos_max in main: %d\n", index_pos_max);
-	swap(pmatrix, index_neg_max, index_pos_max);
+	swap(pmatrix, index_pos_max, index_neg_max);
+	print_pointers(pmatrix);
 	print_debug("%s", "===============================\n");
 	print_matrix(pmatrix);
 	delete_matrix(pmatrix);

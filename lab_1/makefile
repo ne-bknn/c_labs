@@ -10,6 +10,7 @@ CFLAGS += -Wmissing-declarations
 CFLAGS += -DUNITY_SUPPORT_64
 
 ASANFLAGS = -fsanitize=address
+CFLAGS += -fstack-protector-all
 ASANFLAGS += -fno-common
 ASANFLAGS += -fno-omit-frame-pointer
 
@@ -59,6 +60,6 @@ clean:
 
 .PHONY: valgrind
 valgrind: task.out
-	cat test/cases/04_t | valgrind --leak-check=full \
+	cat 'test/cases/05_t' | valgrind --leak-check=full \
          --show-leak-kinds=all --track-origins=yes --verbose \
          --log-file=logs/valgrind-out.txt ./task.out
