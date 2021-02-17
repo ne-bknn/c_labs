@@ -62,9 +62,12 @@ void print_matrix(struct Matrix* pmatrix) {
 void delete_matrix(struct Matrix* pmatrix) {
 	for (size_t i = 0; i < pmatrix->length; ++i) {
 		struct Row* iter = pmatrix->rows[i];	
+		// same as *((*pmatrix).rows+sizeof(struct Row*)*i).numbers -- pointer to a row?
 		free(iter->numbers);
+		// same as *((*pmatrix).rows+sizeof(struct Row*)*i)
 		free(iter);
 	}
+	free(pmatrix->rows);
 	free(pmatrix);
 }
 
@@ -96,29 +99,32 @@ int get_double(double* a) {
 	return n < 0 ? 0 : 1;
 }
 
-void get_min_max(struct Matrix *pmatrix, struct Row **pneg, struct Row **ppos) {
+void get_min_max(struct Matrix *pmatrix, int *index_neg_max, int *index_pos_max) {
 	unsigned int max_positive = 0;
 	unsigned int max_negative = 0;
 	for (size_t i = 0; i < pmatrix->length; ++i) {
+		// rows dereferenced once - got Row*
 		if (pmatrix->rows[i]->n_positive >= max_positive) {
 			max_positive = pmatrix->rows[i]->n_positive;
-			*ppos = pmatrix->rows[i];
+			*index_neg_max = i;
 		}
 		if (pmatrix->rows[i]->n_negative >= max_negative) {
 			max_negative = pmatrix->rows[i]->n_negative;
-			*pneg = pmatrix->rows[i];
+			*index_pos_max = i;
 		}
 	}
+	print_debug("*ppos: %d\n", *index_pos_max);
+	print_debug("*pneg: %d\n", *index_neg_max);
 }
 
-void swap(struct Matrix *pmatrix, struct Row **pneg, struct Row **ppos) {
+void swap(struct Matrix *pmatrix, int index_pos_max, int index_neg_max) {
 	struct Row *temp;
-	temp = *ppos;
-	*ppos = pmatrix->rows[0];
+	temp = pmatrix->rows[0]+sizeof(struct Row*)*index_pos_max;
+	pmatrix->rows[index_pos_max] = pmatrix->rows[0];
 	pmatrix->rows[0] = temp;
-	
-	temp = *pneg;
-	*pneg = pmatrix->rows[pmatrix->length];
+
+	temp = pmatrix->rows[0]+sizeof(struct Row*)*index_neg_max;
+	pmatrix->rows[index_neg_max] = pmatrix->rows[pmatrix->length];
 	pmatrix->rows[pmatrix->length] = temp;
 }
 

@@ -3,6 +3,10 @@
 #ifndef LIB_H
 #define LIB_H
 
+#define DEBUG 1
+#define print_debug(fmt, ...) \
+	do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+
 // Row interface
 struct Row {
 	size_t length;
@@ -28,6 +32,6 @@ void print_warning(char msg[]);
 void print_error(char msg[]);
 void print_matrix(struct Matrix* pmatrix);
 int get_double(double* a);
-void get_min_max(struct Matrix *pmatrix, struct Row **pneg, struct Row **ppos);
-void swap(struct Matrix *pmatrix, struct Row **pneg, struct Row **ppos);
+void get_min_max(struct Matrix *pmatrix, int *index_neg_max, int *index_pos_max);
+void swap(struct Matrix *pmatrix, int index_neg_max, int index_pos_max);
 #endif

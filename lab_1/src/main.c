@@ -6,7 +6,9 @@ int main() {
 	// m - rows, n - columns
 	int n, m, status;
 	get_int(&m);
+	print_debug("M: %d\n", m);
 	get_int(&n);
+	print_debug("N: %d\n", n);
 	
 	struct Matrix* pmatrix = create_matrix(m, n);
 	if (NULL == pmatrix) {
@@ -16,17 +18,17 @@ int main() {
 	int temp;
 	int len = -1;
 	for (int i = 0; i < m; ++i) {
-		while (len < 0 || len > n) {
-			status = get_int(&len);
-			if (status == 0) {
-				print_error("Received unexpected EOF");
-				exit(1);
-			}
-
-			if (len > n || len < 0) {
-				print_error("Failed reading row length, repeat");
-			}
+		status = get_int(&len);
+		if (status == 0) {
+			print_error("Received unexpected EOF");
+			exit(1);
 		}
+
+		if (len > n || len < 1) {
+			print_error("Failed reading row length");
+			exit(1);
+		}
+		print_debug("Length of the row: %d\n", len);
 		struct Row* row = create_row(len);
 		if (NULL == row) {
 			print_error("Failed to create row");
@@ -49,11 +51,14 @@ int main() {
 		}
 		add_row_to_matrix(pmatrix, row, i);
 	}
+
 	print_matrix(pmatrix);
-	struct Row *pneg, *ppos;
-	get_min_max(pmatrix, &pneg, &ppos);
-	// swap(pmatrix, &pneg, &ppos);
-	printf("===============================\n");
+	int index_neg_max = 0, index_pos_max = 0;
+	get_min_max(pmatrix, &index_neg_max, &index_pos_max);
+	print_debug("index_neg_max in main: %d\n", index_neg_max);
+	print_debug("index_pos_max in main: %d\n", index_pos_max);
+	swap(pmatrix, index_neg_max, index_pos_max);
+	print_debug("%s", "===============================\n");
 	print_matrix(pmatrix);
 	delete_matrix(pmatrix);
 	return 0;	
