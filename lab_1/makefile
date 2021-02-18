@@ -38,7 +38,7 @@ libtest: test/*.c src/*.h
 libtest-mem: test/*.c src/*.c src/*.h
 	@echo Running ASAN 
 	@$(CC) $(ASANFLAGS) $(CFLAGS) src/*lib.c test/vendor/unity.c test/*.c -o asan.out $(LIBS)
-	@./asan.out
+	@ASAN_OPTIONS=detect_leaks=1 ./asan.out
 	@echo "ASAN passed"
 	@echo Running MSAN
 	@$(CC) $(MSANFLAGS) $(CLAGS) src/*lib.c test/vendor/unity.c test/*.c -o msan.out $(LIBS)
@@ -50,7 +50,7 @@ libtest-mem: test/*.c src/*.c src/*.h
 test-mem: src/*.c src/*.h
 	@echo Running ASAN 
 	@$(CC) $(ASANFLAGS) $(CFLAGS) src/*.c -o asan.out $(LIBS)
-	@../tools/run_tests.sh asan.out
+	@ASAN_OPTIONS=detect_leaks=1 ../tools/run_tests.sh asan.out
 	@echo "ASAN passed"
 	@echo Running MSAN
 	@$(CC) $(MSANFLAGS) $(CFLAGS) src/*.c -o msan.out $(LIBS)
@@ -84,4 +84,4 @@ fuzz.out: afl-build
 
 .PHONY: afl-start
 afl-start: fuzz.out
-	@AFL_PRELOAD=/home/bakunin/Tools/AFL/libdislocator/libdislocator.so afl-fuzz -i test/cases -o sync -M fuzz1 -- ./fuzz.out
+	@AFL_PRELOAD=/home/bakunin/Tools/AFL/libdislocator/libdislocator.so afl-fuzz -i fuzzing/in -o fuzzing/sync -M fuzz1 -- ./fuzz.out

@@ -82,7 +82,10 @@ int get_int(int* a) {
 	while (n == 0) {
 		n = scanf("%d", a);
 		if (n == 0) { print_warning("Error reading integer value");
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wunused-result"
 			scanf("%*[^\n]");
+			#pragma clang diagnostic pop
 		}
 	}
 	return n < 0 ? 0 : 1;
@@ -94,7 +97,10 @@ int get_double(double* a) {
 		n = scanf("%lf", a);
 		if (n == 0) {
 			print_warning("Error reading float value");
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wunused-result"
 			scanf("%*[^\n]");
+			#pragma clang diagnostic pop
 		}
 	}
 	return n < 0 ? 0 : 1;
