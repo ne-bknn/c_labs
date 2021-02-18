@@ -30,6 +30,7 @@ struct Matrix* create_matrix(size_t len, size_t n_columns) {
 		return NULL;
 	}
 	pmatrix->length = len;
+	pmatrix->filled = 0;
 	pmatrix->n_columns = n_columns;
 	pmatrix->rows = malloc(sizeof(struct Row*)*len);
 	if (NULL == pmatrix->rows) {
@@ -60,7 +61,7 @@ void print_matrix(struct Matrix* pmatrix) {
 }
 
 void delete_matrix(struct Matrix* pmatrix) {
-	for (size_t i = 0; i < pmatrix->length; ++i) {
+	for (size_t i = 0; i < pmatrix->filled; ++i) {
 		struct Row* iter = pmatrix->rows[i];	
 		// same as *((*pmatrix).rows+sizeof(struct Row*)*i).numbers -- pointer to a row?
 		free(iter->numbers);
@@ -73,6 +74,7 @@ void delete_matrix(struct Matrix* pmatrix) {
 
 void add_row_to_matrix(struct Matrix* pmatrix, struct Row *row, size_t index) {
 	pmatrix->rows[index] = row;
+	pmatrix->filled++;
 }
 
 int get_int(int* a) {

@@ -3,7 +3,7 @@
 #ifndef LIB_H
 #define LIB_H
 
-#define DEBUG 1
+#define DEBUG 0
 #define print_debug(fmt, ...) \
 	do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
@@ -21,6 +21,7 @@ struct Row* create_row(size_t len);
 struct Matrix {
 	size_t n_columns;
 	size_t length;
+	size_t filled;
 	struct Row **rows;
 };
 

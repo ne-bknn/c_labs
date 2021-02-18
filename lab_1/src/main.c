@@ -21,23 +21,29 @@ int main() {
 		status = get_int(&len);
 		if (status == 0) {
 			print_error("Received unexpected EOF");
+			delete_matrix(pmatrix);
 			exit(1);
 		}
 
 		if (len > n || len < 1) {
 			print_error("Failed reading row length");
+			delete_matrix(pmatrix);
 			exit(1);
 		}
 		print_debug("Length of the row: %d\n", len);
 		struct Row* row = create_row(len);
 		if (NULL == row) {
 			print_error("Failed to create row");
+			delete_matrix(pmatrix);
 			exit(1);
 		}
 		for (int j = 0; j < len; ++j) {
 			status = get_double(&temp);
 			if (status == 0) {
 				print_error("Recieved unexpected EOF");
+				delete_matrix(pmatrix);
+				free(row->numbers);
+				free(row);
 				exit(1);
 			}
 
