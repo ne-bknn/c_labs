@@ -13,7 +13,9 @@ struct Vector {
 	size_t filled;
 	char **strings;
 };
-
+struct Vector* create_vector();
+int add_word_to_vector(struct Vector *p_vector, char *str);
+void print_vector(struct Vector *p_vector);
 
 // TrieNode interface
 struct TrieNode {
@@ -24,4 +26,6 @@ struct TrieNode {
 	struct TrieNode **children;
 };
 
+
+int read_line(struct Vector *p_vector);
 #endif
