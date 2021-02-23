@@ -19,6 +19,8 @@ MSANFLAGS += -fno-omit-frame-pointer
 MSANFLAGS += -fsanitize-memory-use-after-dtor
 MSANFLAGS += -fsanitize-memory-track-origins=2
 
+UBSANFLAGS = -fsanitize=undefined
+
 UNITYFLAGS = -DUNITY_SUPPORT_64
 
 AFLFLAGS = -Ofast
@@ -46,8 +48,8 @@ libtest-mem: test/*.c src/*.c src/*.h
 	@echo "MSAN passed"
 
 # Full testing
-.PHONY: test-mem
-test-mem: src/*.c src/*.h
+.PHONY: sanitize
+sanitize: src/*.c src/*.h
 	@echo Running ASAN 
 	@$(CC) $(ASANFLAGS) $(CFLAGS) src/*.c -o asan.out $(LIBS)
 	@ASAN_OPTIONS=detect_leaks=1 ../tools/run_tests.sh asan.out
@@ -56,6 +58,9 @@ test-mem: src/*.c src/*.h
 	@$(CC) $(MSANFLAGS) $(CFLAGS) src/*.c -o msan.out $(LIBS)
 	@../tools/run_tests.sh msan.out
 	@echo "MSAN passed"
+	@$(CC) $(UBSANFLAGS) $(CFLAGS) src/*.c -o ubsan.out $(LIBS)
+	@../tools/run_tests.sh ubsan.out
+	@echo "UBSAN passed"
 
 .PHONY: build
 build: src/*.c src/*.h
