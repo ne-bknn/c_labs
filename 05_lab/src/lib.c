@@ -1,6 +1,7 @@
 #include "lib.h"
 #include <string.h>
 #include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 // Vector interface
@@ -31,50 +32,124 @@ int add_word_to_vector(struct Vector *p_vector, char *str) {
 }
 
 void print_vector(struct Vector *p_vector) {
-	printf("Vector: \n");
+	printf("[ ");
 	for (size_t i = 0; i < p_vector->filled; ++i) {
 		printf("%s ", p_vector->strings[i]);
 	}
-	printf("\n");
+	printf("]\n");
+}
+
+void free_vector(struct Vector *p_vector) {
+	for (size_t i = 0; i < p_vector->filled; ++i) {
+		free(p_vector->strings[i]);
+	}
+	free(p_vector->strings);
+	free(p_vector);
 }
 
 // Trie interface
-//struct TrieNode* make_trie_node(char symbol) {
-//	struct TrieNode *node = calloc(1, sizeof(struct TrieNode));
-//	return node;
-//}
+struct TrieNode* make_trie_node(char symbol) {
+	struct TrieNode *pnode = calloc(1, sizeof(struct TrieNode));
+	if (NULL == pnode) {
+		return NULL;
+	}
+	pnode->symbol = symbol;
+	pnode->children = calloc(128, sizeof(struct TrieNode*));
+	if (NULL == pnode->children) {
+		free(pnode);
+		return NULL;
+	}
+	return pnode;
+}
+
+int insert_word_in_trie(struct TrieNode* p_root_node, char *word) {
+	struct TrieNode *current_node = p_root_node;
+	size_t word_len = strlen(word);
+	for (size_t i = 0; i < word_len; ++i) {
+		size_t current_symbol = (size_t)word[i];
+		if (current_symbol < 0 || current_symbol > 127) {
+			return 0;
+		}
+		if (NULL == current_node->children[current_symbol]) {
+			struct TrieNode* new_trie_node = make_trie_node(word[i]);
+			current_node->children[current_symbol] = new_trie_node;
+		}
+		current_node = current_node->children[current_symbol];
+	}
+	current_node->is_leaf = 1;
+	return 1;
+}
+
+bool is_word_in_trie(struct TrieNode* p_root_node, char *word) {
+	struct TrieNode *current_node = p_root_node;
+	size_t word_len = strlen(word);
+	for (size_t i = 0; i < word_len; ++i) {
+		size_t current_symbol = (size_t)word[i];
+		if (current_symbol < 0 || current_symbol > 127) {
+			return false;
+		}
+		if (NULL == current_node->children[current_symbol]) {
+			return false;
+		} else {
+			current_node = current_node->children[current_symbol];
+		}
+	}
+	if (NULL != current_node && current_node->is_leaf == 1) {
+		return true;
+	}
+	return false;
+}
+
+void free_trie(struct TrieNode* p_root_node) {
+	for (size_t i = 0; i < ALPHABET_SIZE; ++i) {
+		if (NULL != p_root_node->children[i]) {
+			free_trie(p_root_node->children[i]);
+		}
+	}
+	free(p_root_node->children);
+	free(p_root_node);
+}
 
 // Misc
-
 // reads until newline, adds words to vector 
 // of strings
 // returns 1 on newline, 2 on eof, 0 on error
+
 int read_line(struct Vector* p_vector) {
-	char *word = calloc(10, sizeof(char));
 	int status1, status2;
 	status1 = 1;
 	while (status1 > 0) {
+		char *word;
 		int is_newline = 0;
-		status1 = scanf("%ms", &word);
-		status2 = scanf("%*[\n]%n", &is_newline);
+		status1 = scanf(" %ms", &word);
+		status2 = scanf("%*1[\n]%n", &is_newline);
+
 		if (status1 == 1) {
 			add_word_to_vector(p_vector, word);
-		} else if (status1 != 0) {
-			perror("scanf");
-		} else {
+		} else if (status1 == 0) {
+			free(word);
 			fprintf(stderr, "No matching chars!\n");
 		}
-		// caught newline
-		if (is_newline == 1) {
+
+		if (is_newline != 0) {
 			return 1;
 		}
 	}
-	// caught eof
-	if (status1 == EOF) {
 
+	if (status1 == EOF) {
+		print_debug("%s", "EXITING AT EOF");
 		return 2;
 	}
 	// caught something strange
+	print_debug("%s", "EXITING AT WTF");
 	return 0;
+}
+
+void print_warning(char msg[]) {
+	fprintf(stderr, "[-] %s\n", msg);
+}
+
+void print_error(char msg[]) {
+	fprintf(stderr, "[!] %s\n", msg);
 }
 

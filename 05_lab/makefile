@@ -60,17 +60,19 @@ test-mem: src/*.c src/*.h
 .PHONY: build
 build: src/*.c src/*.h
 	@echo Building
-	@$(CC) $(CFLAGS) src/*.c -o task.out $(LIBS) 
+	@$(CC) $(DEBUGFLAGS) $(CFLAGS) src/*.c -o task.out $(LIBS) 
 
 task.out: build
 
 .PHONY: clean
 clean:
-	@echo Deleting *.out *.o autotests logs
+	@echo Deleting *.out *.o autotests logs core.* fuzzing/sync/*
 	-@rm *.out 2>/dev/null || true
 	-@rm *.o 2>/dev/null || true
 	-@rm test/autotest/autotest.c 2>/dev/null || true
 	-@rm logs/* 2>/dev/null || true
+	-@rm core.* 2>/dev/null || true
+	-@rm -r fuzzing/sync/* 2>/dev/null || true
 
 .PHONY: valgrind
 valgrind: task.out

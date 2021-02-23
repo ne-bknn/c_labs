@@ -8,6 +8,6 @@ for f in $(ls test/cases); do
 	         --verbose --log-file="logs/valgrind-out-$f.txt" ./task.out < "test/cases/$f" || true
 
 	if grep -q 'no leaks are possible' < "logs/valgrind-out-$f.txt"; then
-		rm "logs/valgrind-out-$f.txt"
+		mv "logs/valgrind-out-$f.txt" "logs/valgrind-out-$f-clean.txt"
 	fi
 done
