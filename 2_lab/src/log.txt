@@ -1,0 +1,139 @@
+==8513== Memcheck, a memory error detector
+==8513== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==8513== Using Valgrind-3.16.1-36d6727e1d-20200622X and LibVEX; rerun with -h for copyright info
+==8513== Command: ./a.out
+==8513== Parent PID: 612
+==8513== 
+--8513-- 
+--8513-- Valgrind options:
+--8513--    --leak-check=full
+--8513--    --show-leak-kinds=all
+--8513--    --track-origins=yes
+--8513--    --verbose
+--8513--    --log-file=log.txt
+--8513-- Contents of /proc/version:
+--8513--   Linux version 5.10.15-arch1-1 (linux@archlinux) (gcc (GCC) 10.2.0, GNU ld (GNU Binutils) 2.36) #1 SMP PREEMPT Wed, 10 Feb 2021 18:32:40 +0000
+--8513-- 
+--8513-- Arch and hwcaps: AMD64, LittleEndian, amd64-cx16-lzcnt-rdtscp-sse3-ssse3
+--8513-- Page sizes: currently 4096, max supported 4096
+--8513-- Valgrind library directory: /usr/lib/valgrind
+--8513-- Reading syms from /home/bakunin/c_labs/2_lab/src/a.out
+--8513-- Reading syms from /usr/lib/ld-2.33.so
+--8513-- Reading syms from /usr/lib/valgrind/memcheck-amd64-linux
+--8513--    object doesn't have a dynamic symbol table
+--8513-- Scheduler: using generic scheduler lock implementation.
+--8513-- Reading suppressions file: /usr/lib/valgrind/default.supp
+==8513== embedded gdbserver: reading from /tmp/vgdb-pipe-from-vgdb-to-8513-by-bakunin-on-???
+==8513== embedded gdbserver: writing to   /tmp/vgdb-pipe-to-vgdb-from-8513-by-bakunin-on-???
+==8513== embedded gdbserver: shared mem   /tmp/vgdb-pipe-shared-mem-vgdb-8513-by-bakunin-on-???
+==8513== 
+==8513== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==8513== don't want to do, unless you know exactly what you're doing,
+==8513== or are doing some strange experiment):
+==8513==   /usr/lib/valgrind/../../bin/vgdb --pid=8513 ...command...
+==8513== 
+==8513== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==8513==   /path/to/gdb ./a.out
+==8513== and then give GDB the following command
+==8513==   target remote | /usr/lib/valgrind/../../bin/vgdb --pid=8513
+==8513== --pid is optional if only one valgrind process is running
+==8513== 
+--8513-- REDIR: 0x40239a0 (ld-linux-x86-64.so.2:strlen) redirected to 0x580b9662 (vgPlain_amd64_linux_REDIR_FOR_strlen)
+--8513-- REDIR: 0x4023770 (ld-linux-x86-64.so.2:index) redirected to 0x580b967c (vgPlain_amd64_linux_REDIR_FOR_index)
+--8513-- Reading syms from /usr/lib/valgrind/vgpreload_core-amd64-linux.so
+--8513-- Reading syms from /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so
+==8513== WARNING: new redirection conflicts with existing -- ignoring it
+--8513--     old: 0x040239a0 (strlen              ) R-> (0000.0) 0x580b9662 vgPlain_amd64_linux_REDIR_FOR_strlen
+--8513--     new: 0x040239a0 (strlen              ) R-> (2007.0) 0x04841d90 strlen
+--8513-- REDIR: 0x4020180 (ld-linux-x86-64.so.2:strcmp) redirected to 0x4842c60 (strcmp)
+--8513-- REDIR: 0x4023f00 (ld-linux-x86-64.so.2:mempcpy) redirected to 0x4846450 (mempcpy)
+--8513-- Reading syms from /usr/lib/libc-2.33.so
+--8513-- REDIR: 0x48fc360 (libc.so.6:memmove) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb860 (libc.so.6:strncpy) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc6a0 (libc.so.6:strcasecmp) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb300 (libc.so.6:strcat) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb8c0 (libc.so.6:rindex) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fda50 (libc.so.6:rawmemchr) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x4915a30 (libc.so.6:wmemchr) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x4915570 (libc.so.6:wcscmp) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc4c0 (libc.so.6:mempcpy) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc2f0 (libc.so.6:bcmp) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb7f0 (libc.so.6:strncmp) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb3b0 (libc.so.6:strcmp) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc430 (libc.so.6:memset) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x4915530 (libc.so.6:wcschr) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb750 (libc.so.6:strnlen) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb490 (libc.so.6:strcspn) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc6f0 (libc.so.6:strncasecmp) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb430 (libc.so.6:strcpy) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc840 (libc.so.6:memcpy@@GLIBC_2.14) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x4916c80 (libc.so.6:wcsnlen) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x49155b0 (libc.so.6:wcscpy) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb900 (libc.so.6:strpbrk) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb360 (libc.so.6:index) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fb710 (libc.so.6:strlen) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x4901e40 (libc.so.6:memrchr) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc740 (libc.so.6:strcasecmp_l) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc2b0 (libc.so.6:memchr) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x4915680 (libc.so.6:wcslen) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fba20 (libc.so.6:strspn) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc640 (libc.so.6:stpncpy) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc5e0 (libc.so.6:stpcpy) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fda90 (libc.so.6:strchrnul) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x48fc790 (libc.so.6:strncasecmp_l) redirected to 0x48341c0 (_vgnU_ifunc_wrapper)
+--8513-- REDIR: 0x490ab10 (libc.so.6:__strrchr_sse2) redirected to 0x4841810 (__strrchr_sse2)
+--8513-- REDIR: 0x48f7620 (libc.so.6:malloc) redirected to 0x483e710 (malloc)
+--8513-- REDIR: 0x490a900 (libc.so.6:__strchrnul_sse2) redirected to 0x4845f40 (strchrnul)
+--8513-- REDIR: 0x490ae10 (libc.so.6:__strlen_sse2) redirected to 0x4841cd0 (__strlen_sse2)
+--8513-- REDIR: 0x4914d00 (libc.so.6:__mempcpy_sse2_unaligned) redirected to 0x4846050 (mempcpy)
+--8513-- REDIR: 0x4910380 (libc.so.6:__strncpy_sse2_unaligned) redirected to 0x4842240 (__strncpy_sse2_unaligned)
+==8513== Conditional jump or move depends on uninitialised value(s)
+==8513==    at 0x4841CE8: __strlen_sse2 (vg_replace_strmem.c:461)
+==8513==    by 0x48D9447: __vfprintf_internal (in /usr/lib/libc-2.33.so)
+==8513==    by 0x48C463E: printf (in /usr/lib/libc-2.33.so)
+==8513==    by 0x10925A: main (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==  Uninitialised value was created by a heap allocation
+==8513==    at 0x483E77F: malloc (vg_replace_malloc.c:307)
+==8513==    by 0x10980A: l_create (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x1095D8: l_push (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x109556: push (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x10923C: main (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513== 
+--8513-- REDIR: 0x48f7c80 (libc.so.6:free) redirected to 0x483f940 (free)
+==8513== Invalid free() / delete / delete[] / realloc()
+==8513==    at 0x483F9AB: free (vg_replace_malloc.c:538)
+==8513==    by 0x10974B: l_free (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x109296: main (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==  Address 0x10a004 is in a r-- mapped file /home/bakunin/c_labs/2_lab/src/a.out segment
+==8513== 
+==8513== 
+==8513== HEAP SUMMARY:
+==8513==     in use at exit: 0 bytes in 0 blocks
+==8513==   total heap usage: 4 allocs, 5 frees, 1,076 bytes allocated
+==8513== 
+==8513== All heap blocks were freed -- no leaks are possible
+==8513== 
+==8513== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
+==8513== 
+==8513== 1 errors in context 1 of 2:
+==8513== Invalid free() / delete / delete[] / realloc()
+==8513==    at 0x483F9AB: free (vg_replace_malloc.c:538)
+==8513==    by 0x10974B: l_free (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x109296: main (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==  Address 0x10a004 is in a r-- mapped file /home/bakunin/c_labs/2_lab/src/a.out segment
+==8513== 
+==8513== 
+==8513== 1 errors in context 2 of 2:
+==8513== Conditional jump or move depends on uninitialised value(s)
+==8513==    at 0x4841CE8: __strlen_sse2 (vg_replace_strmem.c:461)
+==8513==    by 0x48D9447: __vfprintf_internal (in /usr/lib/libc-2.33.so)
+==8513==    by 0x48C463E: printf (in /usr/lib/libc-2.33.so)
+==8513==    by 0x10925A: main (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==  Uninitialised value was created by a heap allocation
+==8513==    at 0x483E77F: malloc (vg_replace_malloc.c:307)
+==8513==    by 0x10980A: l_create (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x1095D8: l_push (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x109556: push (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513==    by 0x10923C: main (in /home/bakunin/c_labs/2_lab/src/a.out)
+==8513== 
+==8513== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)

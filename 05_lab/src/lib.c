@@ -64,6 +64,9 @@ struct TrieNode* make_trie_node(char symbol) {
 
 int insert_word_in_trie(struct TrieNode* p_root_node, char *word) {
 	struct TrieNode *current_node = p_root_node;
+	if (NULL == word) {
+		return 0;
+	}
 	size_t word_len = strlen(word);
 	for (size_t i = 0; i < word_len; ++i) {
 		size_t current_symbol = (size_t)word[i];
