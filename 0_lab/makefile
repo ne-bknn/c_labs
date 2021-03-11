@@ -61,4 +61,4 @@ clean:
 valgrind: task.out
 	cat test/testcases/testcase1 | valgrind --leak-check=full \
          --show-leak-kinds=all --track-origins=yes --verbose \
-         --log-file=logs/valgrind-out.txt ./task.out
+         --log-file=logs/valgrind-out.txt -v ./task.out

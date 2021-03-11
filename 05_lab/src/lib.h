@@ -8,7 +8,7 @@
 #define ALPHABET_SIZE 128
 #define MAX_STRING_SIZE 256
 
-#define DEBUG 0
+#define DEBUG 1
 #define print_debug(fmt, ...) \
 	do { if (DEBUG) { fprintf(stderr, "\n%s", "[.] "); fprintf(stderr, fmt, __VA_ARGS__); fprintf(stderr, "%s", "\n"); } } while (0)
 

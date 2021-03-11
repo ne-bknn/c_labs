@@ -114,7 +114,7 @@ void free_trie(struct TrieNode* p_root_node) {
 }
 
 // Misc
-// reads until newline, adds words to vector 
+// reads until newline, adds words to vector
 // of strings
 // returns 1 on newline, 2 on eof, 0 on error
 
@@ -140,7 +140,7 @@ int read_line(struct Vector* p_vector) {
 	}
 
 	if (status1 == EOF) {
-		print_debug("%s", "EXITING AT EOF");
+		print_debug("%d %s", status1, "EXITING AT EOF");
 		return 2;
 	}
 	// caught something strange
@@ -155,4 +155,3 @@ void print_warning(char msg[]) {
 void print_error(char msg[]) {
 	fprintf(stderr, "[!] %s\n", msg);
 }
-
