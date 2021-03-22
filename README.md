@@ -2,6 +2,8 @@ Labs and some libraries built during Algos and Data Structures course in my fres
 
 Numeration is a bit off and that's not my mistake.
 
+
+## Lab specification
 ### Lab 0
 ![Lab 0](pics/lab0.png)
 
@@ -19,3 +21,10 @@ Numeration is a bit off and that's not my mistake.
 
 ### Lab 5
 ![Lab 5](pics/lab5.png)
+
+## Libraries 
+### Tuilib 
+A library built to simplify and unify terminal-like labs (3, 4, 5), which require some data structure alonside with console that executes some operations. Ops list is defined for every operation, specifying arguments, return type, callback function, etc. Callback function is a wrapper around actual function that unpacks `void**` array of arguments and passes them further.
+
+### Utillib
+Just some useful stuff like switchable debug output and safe `free()`.
