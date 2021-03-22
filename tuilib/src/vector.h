@@ -11,9 +11,12 @@ struct Vector {
 };
 
 struct Vector* vector_create();
-void vector_append(struct Vector* vector, int value);
+void vector_push(struct Vector* vector, int value);
 int vector_pop(struct Vector* vector);
 void vector_delete(struct Vector* vector);
 char* vector_print(struct Vector* vector);
 
+void* tuilib_vector_push(void**args, void* main_structure);
+void* tuilib_vector_print(void**args, void* main_structure);
+void* tuilib_vector_pop(void**args, void* main_structure);
 #endif
