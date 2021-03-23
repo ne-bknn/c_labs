@@ -142,6 +142,7 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 			args[i] = (void*)temp;
 		} else {
 			msg_warn("Got unknown arg type");
+			free_z(args);
 			return 1;
 		}
 	}
@@ -169,7 +170,6 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 	#pragma clang diagnostic ignored "-Wunused-result"
 	scanf("%*[^\n]");
 	#pragma clang diagnostic pop
-
 	return 1;
 }
 

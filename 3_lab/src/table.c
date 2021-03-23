@@ -173,7 +173,8 @@ struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key) {
 				return answer;
 			}
 			if (table->space1[index].key1 == key) {
-				// found, hooray...
+				answer.second = index;
+				return answer;
 			} else {
 				index = func((uint32_t)index);
 				if (index == initial_index) {
@@ -187,7 +188,8 @@ struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key) {
 				return answer;
 			}
 			if (table->space2[index].key2 == key) {
-				// found, hooray...
+				answer.second = index;
+				return answer;
 			} else {
 				index = func((uint32_t)index);
 				if (index == initial_index) {
@@ -200,3 +202,10 @@ struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key) {
 	}
 }
 
+struct Item* table_get(struct Table *table, uint8_t key_space, uint32_t key) {
+	struct Tuple index = table_find(table, key_space, key);
+	if (index.first != 1) {
+		return NULL;
+	}
+
+}
