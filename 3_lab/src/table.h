@@ -37,4 +37,15 @@ struct Tuple {
 
 typedef uint32_t (*hash)(uint32_t key);
 
+struct Table* table_create();
+struct Tuple get_index(struct Item* space, uint32_t key, hash func, uint8_t key_space);
+uint8_t table_insert(struct Table* table, uint32_t key1, uint32_t key2, char *data);
+struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key);
+struct Item* table_get(struct Table *table, uint8_t key_space, uint32_t key);
+void item_print(struct Item* item);
+void table_delete(struct Table* table);
+
+void* tuilib_table_insert(void **callback_data, void *main_structure);
+void* tuilib_item_get(void **callback_data, void *main_structure);
+void * tuilib_table_print(void **callback_data, void *main_structure);
 #endif

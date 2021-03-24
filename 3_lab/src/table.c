@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "tuilib.h"
 #include "utils.h"
@@ -36,6 +37,17 @@ struct Table* table_create() {
 	table->filename = NULL;
 	table->autosave = false;
 	return table;
+}
+
+void table_delete(struct Table* table) {
+	for (size_t i = 0; i < table->space_size; ++i) {
+		if (table->space1[i].is_set != 0) {
+			free_z(table->space1[i].info);
+		}
+	}
+	free_z(table->space1);
+	free_z(table->space2);
+	free_z(table);
 }
 
 // return value is guaranteed to fit inside uint16_t
@@ -97,7 +109,8 @@ struct Tuple get_index(struct Item* space, uint32_t key, hash func, uint8_t key_
 }
 
 // 0 on out of space, 2 on same key, 1 success
-uint8_t table_insert(struct Table* table, uint16_t key1, uint16_t key2, char* data) {
+uint8_t table_insert(struct Table* table, uint32_t key1, uint32_t key2, char* data) {
+	print_debug("%s", "table_insert");
 	// calculating first hash
 	struct Tuple first_index = get_index(table->space1, key1, *hash1, 1);	
 
@@ -122,7 +135,7 @@ uint8_t table_insert(struct Table* table, uint16_t key1, uint16_t key2, char* da
 	}
 	
 	uint16_t index2 = second_index.second;
-
+	print_debug("%s", "table_insert filling data");
 	// filling first item
 	struct Item *item1 = &(table->space1[index1]);
 	item1->is_set = 255;
@@ -130,7 +143,9 @@ uint8_t table_insert(struct Table* table, uint16_t key1, uint16_t key2, char* da
 	item1->key1 = key1;
 	item1->key2 = key2;
 	item1->info = data;
+	print_debug("%s", "before strlen");
 	item1->info_length = strlen(data);
+	print_debug("%s", "after strlen");
 	item1->offset = 0;
 	item1->index1 = index1;
 	item1->index2 = index2;
@@ -174,6 +189,7 @@ struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key) {
 			}
 			if (table->space1[index].key1 == key) {
 				answer.second = index;
+				answer.first = 1;
 				return answer;
 			} else {
 				index = func((uint32_t)index);
@@ -189,6 +205,7 @@ struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key) {
 			}
 			if (table->space2[index].key2 == key) {
 				answer.second = index;
+				answer.first = 1;
 				return answer;
 			} else {
 				index = func((uint32_t)index);
@@ -202,10 +219,76 @@ struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key) {
 	}
 }
 
+uint8_t item_delete(struct Table* table, uint8_t key_space, uint32_t key) {
+	return 0;
+}
+
 struct Item* table_get(struct Table *table, uint8_t key_space, uint32_t key) {
 	struct Tuple index = table_find(table, key_space, key);
 	if (index.first != 1) {
 		return NULL;
 	}
+	if (key_space == 1) {
+		struct Item* item = &table->space1[index.second];
+		return item;
+	} else if (key_space == 2) {
+		struct Item* item = &table->space2[index.second];
+		return item;
+	}
+	return NULL;
+}
 
+void item_print(struct Item* item) {
+	printf("Key #1: %"PRIu32" Key #2: %"PRIu32" Index #1: %"PRIu16" Index #2: %"PRIu16" Data: %s\n", item->key1, item->key2, item->index1, item->index2, item->info);
+}
+
+
+void* tuilib_item_get(void **callback_data, void *main_structure) {
+        struct Table *table = (struct Table*)main_structure;
+        print_debug("%s", "Item get");                         
+        int8_t keyspace = (uint8_t)(*(int*)callback_data[0]);
+	print_debug("%s", "1234");
+	if (keyspace != 1 && keyspace != 2) {
+		msg_warn("Got wrong keyspace!");
+		return NULL;
+	}
+        uint32_t key = (uint32_t)(*(int*)callback_data[1]);
+	print_debug("%s", "111111");
+        struct Item* item = table_get(table, keyspace, key);
+	if (NULL == item) {
+		msg_warn("No such key exists!");
+		return NULL;
+	}
+	item_print(item);
+        return NULL;
+}
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+void* tuilib_table_print(void **callback_data, void *main_structure) {
+#pragma clang diagnostic pop
+	struct Table* table = (struct Table*)main_structure;
+	for (size_t i = 0; i < table->space_size; ++i) {
+		if (table->space1[i].is_set != 0) {
+			item_print(&table->space1[i]);
+		}
+	}
+	return NULL;
+}
+
+void* tuilib_table_insert(void **callback_data, void *main_structure) {
+        struct Table *table = (struct Table*)main_structure;
+        print_debug("%s\n", "Insert");
+        int key1 = (uint32_t)(*(int*)callback_data[0]);
+        int key2 = (uint32_t)(*(int*)callback_data[1]);
+        char *data = (char*)callback_data[2];
+	print_debug("data strlen: %lu, allocating: %lu\n", strlen(data), sizeof(char)*(strlen(data)+1));
+	char *new_data = malloc(sizeof(char)*(strlen(data)+1));
+	// strncpy(new_data, data, strlen(data) fails, why????
+	strcpy(new_data, data);
+	print_debug("new_data: %s\n", new_data);
+	int *status = malloc(sizeof(int));
+        *status = table_insert(table, key1, key2, new_data);
+	print_debug("Return status in insert: %d\n", *status);
+	return (void*)status;
 }
