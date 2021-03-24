@@ -220,7 +220,43 @@ struct Tuple table_find(struct Table *table, uint8_t key_space, uint32_t key) {
 }
 
 uint8_t item_delete(struct Table* table, uint8_t key_space, uint32_t key) {
-	return 0;
+	struct Tuple answer;
+	if (key_space == 1) {
+		print_debug("%s", "In first if");
+		answer = table_find(table, key_space, key);
+		if (answer.first == 0) {
+			print_debug("%s", "returning zero from item_delete");
+			return 0;
+		}
+		uint16_t index = answer.second;
+		uint16_t second_index = table->space1[index].index2;
+		print_debug("data in item we deleting: %s", table->space1[index].info);
+		free_z(table->space1[index].info);
+		table->space1[index].is_set = 0;
+		table->space1[index].is_deleted = 1;
+		table->space2[second_index].is_set = 0;
+		table->space2[second_index].is_deleted = 1;
+	} else if (key_space == 2) {
+		print_debug("%s", "In second if");
+		answer = table_find(table, key_space, key);
+		if (answer.first == 0) {
+			return 0;
+		}
+		uint16_t index = answer.second;
+		uint16_t second_index = table->space1[index].index2;
+		print_debug("data in item we deleting: %s", table->space2[index].info);
+		free_z(table->space2[index].info);
+		
+		table->space1[second_index].is_set = 0;
+		table->space1[second_index].is_deleted = 1;
+
+		table->space2[index].is_set = 0;
+		table->space2[index].is_deleted = 1;
+	} else {
+		msg_error("Got wrong keyspace in inner function, this should not happen!");
+		exit(1);
+	}
+	return 1;
 }
 
 struct Item* table_get(struct Table *table, uint8_t key_space, uint32_t key) {
@@ -242,11 +278,26 @@ void item_print(struct Item* item) {
 	printf("Key #1: %"PRIu32" Key #2: %"PRIu32" Index #1: %"PRIu16" Index #2: %"PRIu16" Data: %s\n", item->key1, item->key2, item->index1, item->index2, item->info);
 }
 
+void* tuilib_item_delete(void **callback_data, void *main_structure) {
+	print_debug("%s", "In tuilib_item_delete");
+	struct Table *table = (struct Table*)main_structure;
+	uint8_t keyspace = (uint8_t)(*(int*)callback_data[0]);
+	if (keyspace != 1 && keyspace != 2) {
+		msg_warn("Got wrong keyspace!");
+		int *status = malloc(sizeof(int));
+		*status = 0;
+		return status;
+	}
+	uint32_t key = (uint32_t)(*(int*)callback_data[1]);
+	int *status = malloc(sizeof(int));
+	*status = item_delete(table, keyspace, key);
+	return status;
+}
 
 void* tuilib_item_get(void **callback_data, void *main_structure) {
         struct Table *table = (struct Table*)main_structure;
         print_debug("%s", "Item get");                         
-        int8_t keyspace = (uint8_t)(*(int*)callback_data[0]);
+        uint8_t keyspace = (uint8_t)(*(int*)callback_data[0]);
 	print_debug("%s", "1234");
 	if (keyspace != 1 && keyspace != 2) {
 		msg_warn("Got wrong keyspace!");
@@ -270,6 +321,7 @@ void* tuilib_table_print(void **callback_data, void *main_structure) {
 	struct Table* table = (struct Table*)main_structure;
 	for (size_t i = 0; i < table->space_size; ++i) {
 		if (table->space1[i].is_set != 0) {
+			print_debug("is_set: %d", table->space1[i].is_set);
 			item_print(&table->space1[i]);
 		}
 	}

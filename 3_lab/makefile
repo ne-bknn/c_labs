@@ -91,4 +91,4 @@ fuzz.out: afl-build
 
 .PHONY: afl-start
 afl-start: fuzz.out
-	@AFL_PRELOAD=/home/bakunin/Tools/AFL/libdislocator/libdislocator.so afl-fuzz -i fuzzing/in -o fuzzing/sync -M fuzz1 -- ./fuzz.out
+	@AFL_PRELOAD=/home/bakunin/Tools/AFL/libdislocator/libdislocator.so afl-fuzz -i fuzzing/in -x fuzzing/dict -o fuzzing/sync -M fuzz1 -- ./fuzz.out
