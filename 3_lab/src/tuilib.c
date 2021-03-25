@@ -94,7 +94,7 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 		if (current_op.arg_types[i] == 0) {
 			int *temp = malloc(sizeof(int));
 			n = scanf("%d", temp);
-			print_debug("REad status int: %d", n);
+			print_debug("%d", n);
 			if (n != 1) {
 				msg_warn("Could not parse command");
 				#pragma clang diagnostic push
@@ -109,10 +109,10 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 			args[i] = (void*)temp;
 		} else if (current_op.arg_types[i] == 1) {
 			// WHY???
-			char* temp;
-			n = scanf("%ms", &temp);
-			print_debug("Got string: %s\n", temp);
-			print_debug("Read status str: %d", n);
+			char** temp = malloc(sizeof(char*));
+			n = scanf("%ms", temp);
+			print_debug("Read this string in parse_input: %s", *temp);
+			print_debug("Read status in parse_input, reading string: %d", n);
 			if (n != 1) {
 				msg_warn("Could not parse command");
 				#pragma clang diagnostic push
@@ -124,7 +124,7 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 				free_z(args);
 				return 1;
 			}
-			args[i] = (void*)temp;
+			args[i] = (void*)(*temp);
 		} else if (current_op.arg_types[i] == 2) {
 			double *temp = malloc(sizeof(double));
 			n = scanf("%lf", temp);
@@ -143,36 +143,19 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 			args[i] = (void*)temp;
 		} else {
 			msg_warn("Got unknown arg type");
-			free_z(args);
 			return 1;
 		}
 	}
-	print_debug("%s\n", "Calling callback in parse_input");
-	void* returned_value = current_op.func(args, main_structure);
-	print_debug("%s\n", "Returned successfully");
-	delete_args_arr(args, current_op.n_args);
 
-	if (current_op.return_type == 0) {
-		print_debug("%s\n", "zdes");
-		printf("%d\n", *((int*)returned_value));
-		print_debug("%s\n", "a teper zdes");
-		free_z(returned_value);
-	} else if (current_op.return_type == 1) {
-		printf("%lf\n", *((double*)returned_value));
-		free_z(returned_value);
-	} else if (current_op.return_type == 3) {
-		printf("%s\n", (char*)returned_value);
-	} else if (current_op.return_type == 4) {
-		printf("%s\n", (char*)returned_value);
-		free_z(returned_value);
-	} else if (current_op.return_type != 5) {
-		msg_error("Unknown return type. This should not happen in runtime");
-	}
+	current_op.func(args, main_structure);
+
+	delete_args_arr(args, current_op.n_args);
 	
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wunused-result"
 	scanf("%*[^\n]");
 	#pragma clang diagnostic pop
+
 	return 1;
 }
 

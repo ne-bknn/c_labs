@@ -146,24 +146,9 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 		}
 	}
 
-	void* returned_value = current_op.func(args, main_structure);
+	current_op.func(args, main_structure);
 
 	delete_args_arr(args, current_op.n_args);
-
-	if (current_op.return_type == 0) {
-		printf("%d\n", *((int*)returned_value));
-		free_z(returned_value);
-	} else if (current_op.return_type == 1) {
-		printf("%lf\n", *((double*)returned_value));
-		free_z(returned_value);
-	} else if (current_op.return_type == 3) {
-		printf("%s\n", (char*)returned_value);
-	} else if (current_op.return_type == 4) {
-		printf("%s\n", (char*)returned_value);
-		free_z(returned_value);
-	} else if (current_op.return_type != 5) {
-		msg_error("Unknown return type. This should not happen in runtime");
-	}
 	
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wunused-result"

@@ -6,7 +6,7 @@ void msg_success(char *msg);
 void msg_warn(char *msg);
 void msg_error(char *msg);
 
-typedef void* (*callback)(void **callback_data, void *main_structure);
+typedef void (*callback)(void **callback_data, void *main_structure);
 
 // arg_types - 0 int, 1 double, 3 char*
 // return_type - 0 int, 1 double, 3 const char*, 4 malloced char*, 5 void

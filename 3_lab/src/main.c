@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "tuilib.h"
 #include "table.h"
+#include "interface_table.h"
 
 #define N_OPS 4
 
@@ -13,8 +14,7 @@ int main() {
 	int insert_args[3]  = {0, 0, 1};
 	int get_args[2] = {0, 0};
 	int delete_args[2] = {0, 0};
-	callback func1 = tuilib_table_insert;
-	struct Op insert_op = {"insert", 3, insert_args, func1, 0, "Inserts value in hashtable"};
+	struct Op insert_op = {"insert", 3, insert_args, &tuilib_table_insert, 0, "Inserts value in hashtable"};
 	struct Op get_op = {"get", 2, get_args, &tuilib_item_get, 5, "Gets Item from table and prints it"};
 	struct Op print_op = {"print", 0, NULL, &tuilib_table_print, 5, "Print the whole table"};
 	struct Op delete_op = {"delete", 2, delete_args, &tuilib_item_delete, 0, "Deletes item from hashtable"};
