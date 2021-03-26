@@ -29,4 +29,6 @@
                 }                \
         } while (0)
 
+#define mknew(t) ((t*)calloc(1, sizeof(t)))
+
 #endif

@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stddef.h>
-#include <stdbool.h>
 
 #ifndef MY_HASHTABLE_H
 #define MY_HASHTABLE_H
@@ -12,7 +11,7 @@
 // integer is 16 bit because our space_size is 65437 < 65535
 struct Item {
 	uint8_t is_set;
-	bool is_deleted;
+	uint8_t is_deleted;
 	uint32_t key1;
 	uint32_t key2;
 	char *info;
@@ -25,9 +24,12 @@ struct Item {
 struct Table {
 	struct Item* space1;
 	struct Item* space2;
-	bool autosave;
-	char *filename;
 	size_t space_size;
+};
+
+struct ExtendedTable {
+	struct Table *table;
+	char *filename;
 };
 
 struct Tuple {
@@ -45,5 +47,12 @@ struct Item* table_get(struct Table *table, uint8_t key_space, uint32_t key);
 void item_print(struct Item* item);
 uint8_t item_delete(struct Table* table, uint8_t key_space, uint32_t key);
 void table_delete(struct Table* table);
+
+struct ExtendedTable* table_load(struct ExtendedTable *ex_table, char *filename);
+struct ExtendedTable* table_extend(struct Table* table);
+uint8_t table_save(struct ExtendedTable* ex_table);
+uint8_t table_fs_insert(struct ExtendedTable* ex_table, uint32_t key1, uint32_t key2, char *data);
+struct Item* table_fs_get(struct ExtendedTable *ex_table, uint8_t key_space, uint32_t key);
+uint8_t item_fs_delete(struct ExtendedTable* table, uint8_t key_space, uint32_t key);
 
 #endif

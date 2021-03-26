@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <stddef.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <inttypes.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #include "tuilib.h"
 #include "utils.h"
@@ -34,9 +35,45 @@ struct Table* table_create() {
 		exit(1);
 	}
 
-	table->filename = NULL;
-	table->autosave = false;
 	return table;
+}
+
+struct ExtendedTable* table_extend(struct Table* table) {
+	struct ExtendedTable* ex_table = malloc(sizeof(struct ExtendedTable));
+	if (NULL == ex_table) {
+		msg_error("Could not allocate memory for extended table!");
+		exit(1);
+	}
+	ex_table->table = table;
+	ex_table->filename = NULL;
+	return ex_table;
+}
+
+struct ExtendedTable* table_load(struct ExtendedTable *ex_table, char *filename) {
+	return NULL;
+}
+
+
+// 1 - success, 2 - no filename assigned, 3 - file opening error, 4 - error writing to file
+uint8_t table_save(struct ExtendedTable* ex_table) {
+	if (NULL == ex_table->filename) {
+		return 2;
+	}
+	FILE *fp;
+	fp = fopen(ex_table->filename, "w");
+	if (NULL == fp) {
+		return 3;
+	}
+	if (fwrite(ex_table->table, sizeof(*ex_table->table), 1, fp) != 1) {
+		return 4;
+	}
+	if (fwrite(ex_table->table->space1, sizeof(struct Item), ex_table->table->space_size, fp) != ex_table->table->space_size) {
+		return 4;
+	}
+	if (fwrite(ex_table->table->space2, sizeof(struct Item), ex_table->table->space_size, fp) != ex_table->table->space_size) {
+		return 4;
+	}
+	return 0;
 }
 
 void table_delete(struct Table* table) {
@@ -139,7 +176,7 @@ uint8_t table_insert(struct Table* table, uint32_t key1, uint32_t key2, char* da
 	// filling first item
 	struct Item *item1 = &(table->space1[index1]);
 	item1->is_set = 255;
-	item1->is_deleted = false;
+	item1->is_deleted = 0;
 	item1->key1 = key1;
 	item1->key2 = key2;
 	item1->info = data;
@@ -153,7 +190,7 @@ uint8_t table_insert(struct Table* table, uint32_t key1, uint32_t key2, char* da
 	// filling second item
 	struct Item *item2 = &(table->space2[index2]);
 	item2->is_set = 255;
-	item2->is_deleted = false;
+	item2->is_deleted = 0;
 	item2->key1 = key1;
 	item2->key2 = key2;
 	item2->info = data;
