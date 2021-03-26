@@ -25,9 +25,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "utils.h"
+#include "../utils.h"
 #include "polytable.h"
-#include "tuilib.h"
+#include "../tuilib.h"
 
 struct Polytable* polytable_create() {
 	struct Polytable* table = mknew(struct Polytable);
