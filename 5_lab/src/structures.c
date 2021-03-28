@@ -53,7 +53,24 @@ struct Hashtable* hashtable_create() {
 }
 
 // inserts key in hashtable, allocates struct Vector*
+// returns 2 on same key, tries to insert on hash+1 on collision
+// 0 on success, 1 on full table
 uint8_t hashtable_insert(struct Hashtable* table, char *key) {
+	if (table->space_size == table->filled) {
+		return 1;
+	}
+
+	uint16_t hash = polyhash(key);
+	struct Item* current_item = &table->space[hash];
+
+	if (current_item->is_set) {
+		if (strcmp(current_item->key, key) == 0) {
+			return 2;
+		}
+		current_item->skipped = 1;
+
+	}
+	return 0;	
 }
 
 
@@ -82,8 +99,10 @@ struct UnorderedVector* vector_create() {
 }
 
 void vector_push(struct UnorderedVector* vector, char* data) {
-	if (vector->size == vector->length) {
-		vector->space = realloc(vector->space, vector->size*2);
+	print_debug("Should i realloc? %u", vector->size <= vector->length);
+	if (vector->size <= vector->length) {
+		print_debug("%s", "reallocing");
+		vector->space = realloc(vector->space, sizeof(char*)*(vector->size*2));
 		if (NULL == vector->space) {
 			msg_error("Failed to realloc vector space!");
 			exit(1);
@@ -91,21 +110,53 @@ void vector_push(struct UnorderedVector* vector, char* data) {
 		vector->size = vector->size*2;
 	}
 	vector->space[vector->length] = data;
+	vector->length += 1;
 }
 
-void vector_delete(struct UnorderedVector* vector, size_t index) {
-	if (index+1 > vector->length) {
-		msg_error("Out of bounds!");
-		exit(1);
-	}
-	free_z(vector->space[index]);
-	vector->length = vector->length - 1;
-	if (index+1 != vector->length) {
-		vector->space[index] = vector->space[vector->length];
+// returns 0 on success, 1 on out of bounds
+uint8_t vector_delete(struct UnorderedVector* vector, size_t index) {
+	// at length 0 any unsigned index is invalid
+	// at legnth 1 index 0 is valid, greater is invalid
+	// at length n index <=n-1 is valid, greater is invalid
+	if (index >= vector->length) {
+		print_debug("%s", "Out of bounds");
+		return 1;
 	}
 
+	free_z(vector->space[index]);
+	vector->length = vector->length - 1;
+	// now moving condition - if we popped from the end
+	// we do not need to move anythin
+	// if 
+	if (index != vector->length) {
+		print_debug("%s", "Freed rightmost element");
+		vector->space[index] = vector->space[vector->length];
+	}
+	
+	// we want to realloc the array we do not want to make it shorter than 8
 	if (vector->length < vector->size/2 && vector->size != 8) {
-		vector->space = realloc(vector->space, vector->size/2);
+		vector->space = realloc(vector->space, sizeof(char*)*(vector->size/2));
+		if (NULL == vector->space) {
+			msg_error("Failed to realloc vector space!");
+			exit(1);
+		}
 		vector->size = vector->size / 2;
 	}
+	return 0;
+}
+
+void vector_free(struct UnorderedVector* vector) {
+	for (size_t i = 0; i < vector->length; ++i) {
+		free_z(vector->space[i]);
+	}
+	free_z(vector->space);
+	free_z(vector);
+}
+
+void vector_print(struct UnorderedVector *vector) {
+	printf("S: %lu, L: %lu [", vector->size, vector->length);
+	for (size_t i = 0; i < vector->length; ++i) {
+		printf("\"%s\", ", vector->space[i]);
+	}
+	printf("]\n");
 }

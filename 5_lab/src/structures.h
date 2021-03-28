@@ -33,7 +33,7 @@ struct UnorderedVector {
 
 struct UnorderedVector* vector_create();
 void vector_push(struct UnorderedVector* vector, char* data);
-void vector_delete(struct UnorderedVector* vector, size_t index);
+uint8_t vector_delete(struct UnorderedVector* vector, size_t index);
 void vector_print(struct UnorderedVector* vector);
 void vector_free(struct UnorderedVector* vector);
 
