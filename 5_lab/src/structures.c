@@ -52,6 +52,31 @@ struct Hashtable* hashtable_create() {
 	return table;
 }
 
+struct UnorderedVector* hashtable_get(struct Hashtable* table, char *key) {
+	uint16_t hash = polyhash(key);
+	struct Item* current_item = &table->space[hash];
+	while (1) {
+		if (strcmp(current_item->key, key) == 0) {
+			return current_item->v;
+		}
+
+		if (current_item->skipped != 1) {
+			// current item is not ours
+			// and the element has never been skipped
+			// so this path was never taken
+			return NULL;
+		}
+		// we can get out of bounds, there's no check!!
+		// TODO: fix this
+		current_item++;
+	}
+}
+
+uint8_t hashtable_delete(struct Hashtable* table, char *key) {
+	return 0;
+}
+
+
 // inserts key in hashtable, allocates struct Vector*
 // returns 2 on same key, tries to insert on hash+1 on collision
 // 0 on success, 1 on full table
@@ -62,14 +87,27 @@ uint8_t hashtable_insert(struct Hashtable* table, char *key) {
 
 	uint16_t hash = polyhash(key);
 	struct Item* current_item = &table->space[hash];
-
-	if (current_item->is_set) {
+	struct Item* first_item = current_item;
+	
+	while (current_item->is_set) {
+		// no boundary check either, this is BAD
+		// TODO: add boundary check
 		if (strcmp(current_item->key, key) == 0) {
 			return 2;
 		}
-		current_item->skipped = 1;
-
+		current_item++;
 	}
+
+	while (1) {
+		if (first_item == current_item) {
+			break;
+		}
+		first_item->skipped = 1;
+		first_item++;
+	}
+	current_item->key = key;
+	current_item->is_set = 1;
+	current_item->v = vector_create();
 	return 0;	
 }
 

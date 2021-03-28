@@ -13,7 +13,7 @@ struct Item {
 	uint8_t is_set;
 	uint8_t skipped;
 	char* key;
-	struct Vector* v;
+	struct UnorderedVector* v;
 };
 
 struct Hashtable {
@@ -23,6 +23,10 @@ struct Hashtable {
 };
 
 struct Hashtable* hashtable_create();
+uint8_t hashtable_insert(struct Hashtable* table, char *key);
+struct UnorderedVector* hashtable_get(struct Hashtable* table, char *key);
+uint8_t hashtable_delete(struct Hashtable* table, char *key);
+void hashtable_free(struct Hashtable* table);
 
 // UnorderedVector
 struct UnorderedVector {
@@ -36,5 +40,10 @@ void vector_push(struct UnorderedVector* vector, char* data);
 uint8_t vector_delete(struct UnorderedVector* vector, size_t index);
 void vector_print(struct UnorderedVector* vector);
 void vector_free(struct UnorderedVector* vector);
+
+// Graph
+struct Graph {
+	struct Hashtable* adj_list;
+};
 
 #endif
