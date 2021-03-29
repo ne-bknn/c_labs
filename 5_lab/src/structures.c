@@ -52,12 +52,23 @@ struct Hashtable* hashtable_create() {
 	return table;
 }
 
+// just a convenience function
 struct UnorderedVector* hashtable_get(struct Hashtable* table, char *key) {
-	uint16_t hash = polyhash(key);
-	struct Item* current_item = &table->space[hash];
+	struct Item* item = hashtable_find(table, key);
+	if (NULL == item) {
+		return NULL;
+	} else {
+		return item->v;
+	}
+}
+
+struct Item* hashtable_find(struct Hashtable* table, char *key) {
+	uint16_t initial_hash = polyhash(key);
+	uint16_t current_hash = initial_hash;
 	while (1) {
+		struct Item* current_item = &table->space[current_hash];
 		if (strcmp(current_item->key, key) == 0) {
-			return current_item->v;
+			return current_item;
 		}
 
 		if (current_item->skipped != 1) {
@@ -66,42 +77,48 @@ struct UnorderedVector* hashtable_get(struct Hashtable* table, char *key) {
 			// so this path was never taken
 			return NULL;
 		}
-		// we can get out of bounds, there's no check!!
-		// TODO: fix this
-		current_item++;
+		current_hash = (current_hash + 1) % HASHTABLE_SPACE_SIZE;
+		if (current_hash == initial_hash) {
+			return NULL;
+		}
 	}
+
 }
 
-uint8_t hashtable_delete(struct Hashtable* table, char *key) {
-	return 0;
+uint8_t hashtable_delete_item(struct Hashtable* table, char *key) {
+	struct Item* item = hashtable_get(
 }
 
 
 // inserts key in hashtable, allocates struct Vector*
 // returns 2 on same key, tries to insert on hash+1 on collision
-// 0 on success, 1 on full table
+// 0 on success, 1 on full table, 3 on very weird error
 uint8_t hashtable_insert(struct Hashtable* table, char *key) {
 	if (table->space_size == table->filled) {
 		return 1;
 	}
 
-	uint16_t hash = polyhash(key);
-	struct Item* current_item = &table->space[hash];
+	uint16_t initial_hash = polyhash(key);
+	uint16_t current_hash = initial_hash;
+	struct Item* current_item = &table->space[initial_hash];
 	struct Item* first_item = current_item;
 	
-	while (current_item->is_set) {
-		// no boundary check either, this is BAD
-		// TODO: add boundary check
+	while (table->space[current_hash].is_set) {
 		if (strcmp(current_item->key, key) == 0) {
 			return 2;
 		}
-		current_item++;
-	}
-
-	while (1) {
-		if (first_item == current_item) {
-			break;
+		current_hash++;
+		current_item = &table->space[current_hash];
+		if (current_hash == initial_hash) {
+			// we returned back: this should NOT happen...
+			msg_warn("Returned back in insert, this should NOT happen");
+			return 3;
 		}
+	}
+	
+	// splitting it in two for atomicity: there wont be any
+	// additional skipped marks in case of error
+	while (first_item != current_item) {
 		first_item->skipped = 1;
 		first_item++;
 	}

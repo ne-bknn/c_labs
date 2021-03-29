@@ -25,7 +25,8 @@ struct Hashtable {
 struct Hashtable* hashtable_create();
 uint8_t hashtable_insert(struct Hashtable* table, char *key);
 struct UnorderedVector* hashtable_get(struct Hashtable* table, char *key);
-uint8_t hashtable_delete(struct Hashtable* table, char *key);
+struct Item* hashtable_find(struct Hashtable* tbale, char *key);
+uint8_t hashtable_delete_item(struct Hashtable* table, char *key);
 void hashtable_free(struct Hashtable* table);
 
 // UnorderedVector
