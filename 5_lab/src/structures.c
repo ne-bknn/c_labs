@@ -3,7 +3,7 @@
  * actual graph
  *
  * We need 
- * a) Hashtable char* -> void*
+ * a) Hashtable char* -> struct UnorderedVector*
  * b) Dynamically sized vector of char*
 */ 
 
@@ -85,8 +85,16 @@ struct Item* hashtable_find(struct Hashtable* table, char *key) {
 
 }
 
+// 1 on success, 0 on no such key
 uint8_t hashtable_delete_item(struct Hashtable* table, char *key) {
-	struct Item* item = hashtable_get(
+	struct Item* item = hashtable_find(table, key);
+	if (NULL == item) {
+		return 0;
+	}
+	free_z(item->key);
+	vector_free(item->v);
+	item->is_set = 0;
+	return 1;
 }
 
 
