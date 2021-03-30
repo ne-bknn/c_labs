@@ -176,9 +176,14 @@ void vector_push(struct UnorderedVector* vector, char* data) {
 	vector->length += 1;
 }
 
-// TODO: actually implement this
-uint64_t vector_find(struct UnorderedVector* vector, char* data) {
-	return 0;
+int64_t vector_find(struct UnorderedVector* vector, char* data) {
+	char* iter = *vector->space;
+	for (int64_t i = 0; i < vector->length; ++i) {
+		if (strcmp(iter+i, data) == 0) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 // returns 0 on success, 1 on out of bounds
@@ -229,6 +234,7 @@ void vector_print(struct UnorderedVector *vector) {
 	printf("]\n");
 }
 
+// Graph interface
 struct Graph* graph_create() {
 	struct Hashtable* table = hashtable_create();
 	struct Graph* graph = mknew(struct Graph);
