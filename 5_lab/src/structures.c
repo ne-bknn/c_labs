@@ -290,10 +290,74 @@ uint8_t graph_add_edge(struct Graph* graph, char* vertex_name_1, char* vertex_na
 }
 
 uint8_t graph_delete_edge(struct Graph* graph, char* vertex_name_1, char* vertex_name_2) {
+	if (vector_find(graph->vertex_list, vertex_name_1) == -1) {
+		msg_warn("First provided vertex does not exist");
+		return 1;
+	}
+
+	if (vector_find(graph->vertex_list, vertex_name_2) == -1) {
+		msg_warn("Second provided vertex does not exist");
+		return 1;
+	}
+
+	struct UnorderedVector* first_vector = hashtable_get(graph->adj_list, vertex_name_1);
+	if (NULL == first_vector) {
+		msg_error("Something weird happened: first vector is NULL");
+		return 3;
+	}
+	int64_t vertex_index = vector_find(first_vector, vertex_name_2);
+	if (vertex_index == -1) {
+		msg_warn("Vertecies are not connected");
+		return 2;
+	}
+	struct UnorderedVector* second_vector = hashtable_get(graph->adj_list, vertex_name_2);
+	if (NULL == second_vector) {
+		msg_error("Something weird happened: second vector is NULL");
+		return 3;
+	}
+	int64_t another_vertex_index = vector_find(second_vector, vertex_name_1);
+	if (vertex_index == -1) {
+		msg_error("Weird error: vertex1 is connected with vertex2, but not otherwise");
+		return 3;
+	}
+	vector_delete(first_vector, vertex_index);
+	vector_delete(second_vector, another_vertex_index);
 	return 0;
+
 }
 
 uint8_t graph_delete_vertex(struct Graph* graph, char* vertex_name) {
+	if (vector_find(graph->vertex_list, vertex_name) == -1) {
+		msg_warn("No such vertex exists");
+		return 1;
+	}
+
+	struct UnorderedVector* vector = hashtable_get(graph->adj_list, vertex_name);
+	for (size_t i = 0; i < vector->length; ++i) {
+		char* current_key = vector->space[i];
+		struct UnorderedVector* inner_vector = hashtable_get(graph->adj_list, current_key);
+		if (NULL == inner_vector) {
+			msg_warn("Hit nonexistent key while deleting: this should not happen");
+			continue;
+		}
+		int64_t index = vector_find(inner_vector, vertex_name);
+		if (index == -1) {
+			msg_warn("Hit no connection with starting vertex in adjacent vertex: this should not happen");
+			continue;
+		}
+		vector_delete(inner_vector, index);
+	}
+	uint8_t status = hashtable_delete_item(graph->adj_list, vertex_name);
+	if (status == 0) {
+		msg_error("Weird! No such key after all the work! This should NOT happen!");
+		return 2;
+	}
+	int64_t index = vector_find(graph->vertex_list, vertex_name);
+	if (index == -1) {
+		msg_error("WEIRD! No key in vertex_list during deletion!");
+		return 2;
+	}
+	vector_delete(graph->vertex_list, index);
 	return 0;
 }
 
