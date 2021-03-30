@@ -137,6 +137,17 @@ uint8_t hashtable_insert(struct Hashtable* table, char *key) {
 }
 
 
+void hashtable_free(struct Hashtable *table) {
+	for (size_t i = 0; i < HASHTABLE_SPACE_SIZE; ++i) {
+		if (table->space[i].is_set != 0) {
+			free_z(table->space[i].key);
+			vector_free(table->space[i].v);
+		}
+	}
+	free_z(table->space);
+	free_z(table);
+}
+
 // UnorderedVector of char* 
 // Plain dynamically sized array of pointers to char
 // Pushes to the end, on deletion frees the pointer
@@ -372,5 +383,27 @@ void graph_generate(struct Graph* graph) {
 void graph_load(struct Graph* graph) {
 }
 
-void graph_save(struct Graph* graph) {
+uint8_t graph_save(struct Graph *graph, char *filename) {
+	FILE *fp = fopen(filename, "w");
+	if (NULL == fp) {
+		return 1;
+	}
+	
+	for (size_t i = 0; i < graph->vertex_list->length; ++i) {
+		char* current_key = graph->vertex_list->space[i];
+		struct UnorderedVector* v = hashtable_get(graph->adj_list, current_key);
+		fprintf(fp, "%s ", current_key);
+		for (size_t j = 0; j < v->length; ++j) {
+			fprintf(fp, "%s ", v->space[j]);
+		}
+		fprintf(fp, "\n");
+	}
+	
+	fclose(fp);
+	return 0;
+}
+
+void graph_free(struct Graph *graph) {
+	vector_free(graph->vertex_list);
+	hashtable_free(graph->adj_list);
 }

@@ -15,7 +15,6 @@ struct Item {
 	char* key;
 	struct UnorderedVector* v;
 };
-
 struct Hashtable {
 	size_t space_size;
 	size_t filled;
