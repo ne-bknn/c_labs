@@ -289,4 +289,24 @@ uint8_t graph_add_edge(struct Graph* graph, char* vertex_name_1, char* vertex_na
 	return 0;
 }
 
+uint8_t graph_delete_edge(struct Graph* graph, char* vertex_name_1, char* vertex_name_2) {
+	return 0;
+}
 
+uint8_t graph_delete_vertex(struct Graph* graph, char* vertex_name) {
+	return 0;
+}
+
+// struct is called UnorderedVector, but it becomes unordered only because of deletion, so i guess i'll use it here..
+struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, char* vertex_name_2) {
+	return NULL;
+}
+
+void graph_generate(struct Graph* graph) {
+}
+
+void graph_load(struct Graph* graph) {
+}
+
+void graph_save(struct Graph* graph) {
+}
