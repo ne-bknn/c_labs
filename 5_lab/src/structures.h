@@ -39,12 +39,14 @@ struct UnorderedVector {
 struct UnorderedVector* vector_create();
 void vector_push(struct UnorderedVector* vector, char* data);
 uint8_t vector_delete(struct UnorderedVector* vector, size_t index);
+int64_t vector_find(struct UnorderedVector* vector, char* data);
 void vector_print(struct UnorderedVector* vector);
 void vector_free(struct UnorderedVector* vector);
 
 // Graph
 struct Graph {
 	struct Hashtable* adj_list;
+	struct UnorderedVector* vertex_list;
 };
 
 #endif

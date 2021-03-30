@@ -176,6 +176,11 @@ void vector_push(struct UnorderedVector* vector, char* data) {
 	vector->length += 1;
 }
 
+// TODO: actually implement this
+uint64_t vector_find(struct UnorderedVector* vector, char* data) {
+	return 0;
+}
+
 // returns 0 on success, 1 on out of bounds
 uint8_t vector_delete(struct UnorderedVector* vector, size_t index) {
 	// at length 0 any unsigned index is invalid
@@ -223,3 +228,59 @@ void vector_print(struct UnorderedVector *vector) {
 	}
 	printf("]\n");
 }
+
+struct Graph* graph_create() {
+	struct Hashtable* table = hashtable_create();
+	struct Graph* graph = mknew(struct Graph);
+	graph->adj_list = table;
+	graph->vertex_list = vector_create();
+	return graph;
+}
+
+uint8_t graph_add_vertex(struct Graph* graph, char* vertex_name) {
+	uint8_t hashtable_insert_status = hashtable_insert(graph->adj_list, vertex_name);	
+	if (hashtable_insert_status != 0) {
+		msg_error("Something went wrong when trying to insert in hashtable");
+		return 1;
+	}
+	vector_push(graph->vertex_list, vertex_name);
+	return 0;
+}
+
+// returns 0 on succ, returns 1 on nonexistent vertices, 2 on edge exists, 3 on weird errors
+uint8_t graph_add_edge(struct Graph* graph, char* vertex_name_1, char* vertex_name_2) {
+	if (vector_find(graph->vertex_list, vertex_name_1) == -1) {
+		msg_warn("First provided vertex does not exist");
+		return 1;
+	}
+	if (vector_find(graph->vertex_list, vertex_name_2) == -1) {
+		msg_warn("Second provided vertex does not exist");
+		return 1;
+	}
+	struct UnorderedVector* first_vector = hashtable_get(graph->adj_list, vertex_name_1);
+	if (NULL == first_vector) {
+		msg_error("Something weird happened: first vector is NULL");
+		return 3;
+	}
+	struct UnorderedVector* second_vector = hashtable_get(graph->adj_list, vertex_name_2);
+	if (NULL == second_vector) {
+		msg_error("Something weird happened: second vector is NULL");
+		return 3;
+	}
+	int64_t vertex_index;
+	if (first_vector->length <= second_vector->length) {
+		vertex_index = vector_find(first_vector, vertex_name_2);
+	} else {
+		vertex_index = vector_find(second_vector, vertex_name_1);
+	}
+	if (vertex_index != -1) {
+		msg_warn("Such an edge already exists");
+		return 2;
+	}
+	print_debug("%s", "Creating edge");	
+	vector_push(first_vector, vertex_name_2);
+	vector_push(second_vector, vertex_name_1);
+	return 0;
+}
+
+
