@@ -188,9 +188,11 @@ void vector_push(struct UnorderedVector* vector, char* data) {
 }
 
 int64_t vector_find(struct UnorderedVector* vector, char* data) {
-	char* iter = *vector->space;
-	for (int64_t i = 0; i < vector->length; ++i) {
-		if (strcmp(iter+i, data) == 0) {
+	char** space = vector->space;
+	print_debug("data in vector_find: %s", data);
+	for (size_t i = 0; i < vector->length; ++i) {
+		print_debug("iter+i in vector_find: %s", (space[i]));
+		if (strcmp(space[i], data) == 0) {
 			return i;
 		}
 	}
@@ -272,6 +274,7 @@ uint8_t graph_add_edge(struct Graph* graph, char* vertex_name_1, char* vertex_na
 		return 1;
 	}
 	if (vector_find(graph->vertex_list, vertex_name_2) == -1) {
+		print_debug("graph_add_edge, vertex_name_2: %s", vertex_name_2);
 		msg_warn("Second provided vertex does not exist");
 		return 1;
 	}
@@ -443,8 +446,9 @@ uint8_t graph_output(struct Graph *graph, char *filename) {
 		}
 		fprintf(fp, "\n");
 	}
-	
-	fclose(fp);
+	if (fp != stdout) {	
+		fclose(fp);
+	}
 	return 0;
 }
 

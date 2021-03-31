@@ -6,7 +6,7 @@ CFLAGS = -std=c99
 CFLAGS += -Wall
 CFLAGS += -Wextra
 CFLAGS += -pedantic
-CFLAGS += -Werror
+#CFLAGS += -Werror
 CFLAGS += -Wmissing-declarations
 CFLAGS += -fstack-protector-all
 

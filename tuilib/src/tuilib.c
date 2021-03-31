@@ -109,9 +109,10 @@ int parse_input(void *main_structure, struct Op *ops, size_t n_ops) {
 			args[i] = (void*)temp;
 		} else if (current_op.arg_types[i] == 1) {
 			// WHY???
-			char** temp = malloc(sizeof(char*));
-			n = scanf("%ms", temp);
-			print_debug("%d", n);
+			char *temp;
+			n = scanf("%ms", &temp);
+			print_debug("Status in parse_input: %d", n);
+			print_debug("Read in parse_input: %s", temp);
 			if (n != 1) {
 				msg_warn("Could not parse command");
 				#pragma clang diagnostic push
