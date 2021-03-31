@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "lib.h"
+#include "structures_interface.h"
+#include "structures.h"
 
 int main() {
 	return 0;

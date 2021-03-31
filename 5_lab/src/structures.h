@@ -57,6 +57,6 @@ uint8_t graph_delete_vertex(struct Graph* graph, char* vertex_name);
 struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, char* vertex_name_2);
 void graph_generate(struct Graph* graph);
 struct Graph* graph_load(struct Graph* graph, char *filename);
-uint8_t graph_save(struct Graph *graph, char *filename);
+uint8_t graph_output(struct Graph *graph, char *filename);
 
 #endif

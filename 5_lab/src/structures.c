@@ -422,8 +422,13 @@ struct Graph* graph_load(struct Graph* graph, char *filename) {
 	return graph;	
 }
 
-uint8_t graph_save(struct Graph *graph, char *filename) {
-	FILE *fp = fopen(filename, "w");
+uint8_t graph_output(struct Graph *graph, char *filename) {
+	FILE *fp;
+	if (filename != NULL) {
+		fp = fopen(filename, "w");
+	} else {
+		fp = stdout;
+	}
 	if (NULL == fp) {
 		return 1;
 	}
