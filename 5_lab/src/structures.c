@@ -266,6 +266,7 @@ uint8_t graph_add_vertex(struct Graph* graph, char* vertex_name) {
 		return 1;
 	}
 	char* vertex_name_copy = malloc((strlen(vertex_name)+1)*sizeof(char));
+	strcpy(vertex_name_copy, vertex_name);
 	vector_push(graph->vertex_list, vertex_name_copy);
 	return 0;
 }
