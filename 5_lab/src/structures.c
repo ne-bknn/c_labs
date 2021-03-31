@@ -254,6 +254,7 @@ struct Graph* graph_create() {
 	return graph;
 }
 
+// returns 1 on hashtable error, 0 on succ
 uint8_t graph_add_vertex(struct Graph* graph, char* vertex_name) {
 	uint8_t hashtable_insert_status = hashtable_insert(graph->adj_list, vertex_name);	
 	if (hashtable_insert_status != 0) {
@@ -380,7 +381,45 @@ struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, cha
 void graph_generate(struct Graph* graph) {
 }
 
-void graph_load(struct Graph* graph) {
+struct Graph* graph_load(struct Graph* graph, char *filename) {
+	graph_free(graph);
+	graph = graph_create();
+	FILE *fp = fopen(filename, "r");
+	if (NULL == fp) {
+		return NULL;
+	}
+	
+	char* current_key;
+	char* temp_key;
+	size_t n_adjacent;
+	int status;
+	while (1) {
+		status = fscanf(fp, "%ms", &current_key);
+		if (status != 1) {
+			graph_free(graph);
+			return NULL;
+		}
+		
+		graph_add_vertex(graph, current_key);
+
+		status = fscanf(fp, "%lu", &n_adjacent);
+		if (status != 1) {
+			graph_free(graph);
+			return NULL;
+		}
+
+		for (size_t i = 0; i < n_adjacent; ++i) {
+			status = fscanf(fp, "%ms", &temp_key);
+			if (status != 1) {
+				graph_free(graph);
+				return NULL;
+			}
+			status = graph_add_vertex(graph, temp_key);
+			// deeper logic needed here
+			status = graph_add_edge(graph, current_key, temp_key);
+		}
+	}
+	return graph;	
 }
 
 uint8_t graph_save(struct Graph *graph, char *filename) {
@@ -388,11 +427,12 @@ uint8_t graph_save(struct Graph *graph, char *filename) {
 	if (NULL == fp) {
 		return 1;
 	}
-	
+	// key n_of_adjacent_vertecies vertex1 vertex2 vertex3	
 	for (size_t i = 0; i < graph->vertex_list->length; ++i) {
 		char* current_key = graph->vertex_list->space[i];
 		struct UnorderedVector* v = hashtable_get(graph->adj_list, current_key);
 		fprintf(fp, "%s ", current_key);
+		fprintf(fp, "%lu ", v->length);
 		for (size_t j = 0; j < v->length; ++j) {
 			fprintf(fp, "%s ", v->space[j]);
 		}
