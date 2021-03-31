@@ -191,7 +191,9 @@ int64_t vector_find(struct UnorderedVector* vector, char* data) {
 	char** space = vector->space;
 	print_debug("data in vector_find: %s", data);
 	for (size_t i = 0; i < vector->length; ++i) {
-		print_debug("iter+i in vector_find: %s", (space[i]));
+		if (NULL != space[i]) {
+			print_debug("iter+i in vector_find: %s", (space[i]));
+		}
 		if (strcmp(space[i], data) == 0) {
 			return i;
 		}
@@ -263,7 +265,8 @@ uint8_t graph_add_vertex(struct Graph* graph, char* vertex_name) {
 		msg_error("Something went wrong when trying to insert in hashtable");
 		return 1;
 	}
-	vector_push(graph->vertex_list, vertex_name);
+	char* vertex_name_copy = malloc((strlen(vertex_name)+1)*sizeof(char));
+	vector_push(graph->vertex_list, vertex_name_copy);
 	return 0;
 }
 
