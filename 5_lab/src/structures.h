@@ -48,7 +48,7 @@ struct Graph {
 	struct UnorderedVector* vertex_list;
 };
 
-struct Graph* graph_create();
+struct Graph* graph_create(struct Graph* graph);
 uint8_t graph_add_vertex(struct Graph* graph, char* vertex_name);
 uint8_t graph_add_edge(struct Graph* graph, char* vertex_name_1, char* vertex_name_2);
 void graph_free(struct Graph *graph);

@@ -23,7 +23,7 @@ int main() {
 	struct Op vertex_list_op = {"vertex_list", 0, NULL, &tuilib_graph_vertex_list, 0, "Prints all the vertecies of the graph"};
 
 	struct Op operations[N_OPS] = {save_op, print_op, delete_vertex_op, delete_edge_op, add_edge_op, add_vertex_op, vertex_list_op};
-	struct Graph *graph = graph_create();
+	struct Graph *graph = graph_create(NULL);
 	void* structure = (void*)graph;
 	int flag = 1;
 

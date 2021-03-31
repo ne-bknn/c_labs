@@ -250,10 +250,14 @@ void vector_print(struct UnorderedVector *vector) {
 }
 
 // Graph interface
-struct Graph* graph_create() {
-	struct Hashtable* table = hashtable_create();
-	struct Graph* graph = mknew(struct Graph);
-	graph->adj_list = table;
+struct Graph* graph_create(struct Graph* graph) {
+	if (NULL == graph) {
+		graph = mknew(struct Graph);
+	} else {
+		vector_free(graph->vertex_list);
+		hashtable_free(graph->adj_list);
+	}
+	graph->adj_list = hashtable_create();
 	graph->vertex_list = vector_create();
 	return graph;
 }
@@ -389,13 +393,13 @@ void graph_generate(struct Graph* graph) {
 }
 
 struct Graph* graph_load(struct Graph* graph, char *filename) {
-	graph_free(graph);
-	graph = graph_create();
 	FILE *fp = fopen(filename, "r");
 	if (NULL == fp) {
 		return NULL;
 	}
 	
+	graph = graph_create(graph);
+
 	char* current_key;
 	char* temp_key;
 	size_t n_adjacent;

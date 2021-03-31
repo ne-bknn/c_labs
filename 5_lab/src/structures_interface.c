@@ -71,3 +71,13 @@ void tuilib_graph_vertex_list(void **callback_data, void *main_structure) {
 	struct Graph *graph = (struct Graph*)main_structure;
 	vector_print(graph->vertex_list);
 }
+
+void tuilib_graph_load(void **callback_data, void *main_structure) {
+	struct Graph *graph = (struct Graph*)main_structure;
+	char *filename = (char*)(callback_data[0]);
+	graph = graph_load(graph, filename);
+	if (NULL == graph) {
+		msg_warn("Error loading graph from file!");
+	}
+	graph_create(graph);
+}
