@@ -250,23 +250,31 @@ void vector_print(struct UnorderedVector *vector) {
 }
 
 // Graph interface
-struct Graph* graph_create(struct Graph* graph) {
-	if (NULL == graph) {
-		graph = mknew(struct Graph);
-	} else {
-		vector_free(graph->vertex_list);
-		hashtable_free(graph->adj_list);
-	}
+struct Graph* graph_create() {
+	struct Graph* graph = mknew(struct Graph);
 	graph->adj_list = hashtable_create();
 	graph->vertex_list = vector_create();
 	return graph;
 }
 
-// returns 1 on hashtable error, 0 on succ
+// returns 1 on general hashtable error, 0 on succ
+// 2 on hashtable same key insertion
 uint8_t graph_add_vertex(struct Graph* graph, char* vertex_name) {
 	uint8_t hashtable_insert_status = hashtable_insert(graph->adj_list, vertex_name);	
+	if (hashtable_insert_status == 2) {
+		msg_error("Same key insertion attempt!");
+		return 2;
+	}
+	if (hashtable_insert_status == 1) {
+		msg_error("The table is full!");
+		return 1;
+	}
+	if (hashtable_insert_status == 3) {
+		msg_error("Very weird hashtable error");
+		return 1;
+	}
 	if (hashtable_insert_status != 0) {
-		msg_error("Something went wrong when trying to insert in hashtable");
+		msg_error("Junk return status from hashtable_insert!");
 		return 1;
 	}
 	char* vertex_name_copy = malloc((strlen(vertex_name)+1)*sizeof(char));
@@ -392,21 +400,25 @@ struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, cha
 void graph_generate(struct Graph* graph) {
 }
 
-struct Graph* graph_load(struct Graph* graph, char *filename) {
+struct Graph* graph_load(char *filename) {
 	FILE *fp = fopen(filename, "r");
 	if (NULL == fp) {
 		return NULL;
 	}
 	
-	graph = graph_create(graph);
+	struct Graph* graph = graph_create();
 
 	char* current_key;
 	char* temp_key;
 	size_t n_adjacent;
 	int status;
+	// wrong input; double free somewhere inside
+	// wrong input leads to going into "error" ifs
+	// and "error" ifs trigger double free for some reason
 	while (1) {
 		status = fscanf(fp, "%ms", &current_key);
 		if (status != 1) {
+			print_debug("status in graph_load: %d", status);
 			graph_free(graph);
 			return NULL;
 		}
@@ -443,6 +455,7 @@ uint8_t graph_output(struct Graph *graph, char *filename) {
 	if (NULL == fp) {
 		return 1;
 	}
+
 	// key n_of_adjacent_vertecies vertex1 vertex2 vertex3	
 	for (size_t i = 0; i < graph->vertex_list->length; ++i) {
 		char* current_key = graph->vertex_list->space[i];
@@ -461,6 +474,7 @@ uint8_t graph_output(struct Graph *graph, char *filename) {
 }
 
 void graph_free(struct Graph *graph) {
+	print_debug("Entered graph_free with pointer: %p", (void*)graph);
 	vector_free(graph->vertex_list);
 	hashtable_free(graph->adj_list);
 }
