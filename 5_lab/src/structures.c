@@ -10,6 +10,9 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 
 #include "structures.h"
 #include "utils.h"
@@ -400,7 +403,96 @@ struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, cha
 	return NULL;
 }
 
-void graph_generate(struct Graph* graph) {
+// graph generation utils
+
+// returns random string of length 4
+char* get_rnd_string(uint8_t length) {
+	char* str = malloc(sizeof(char)*(length+1));
+	char array[100] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+	for (size_t i = 0; i < length; ++i) {
+		str[i] = array[rand()%52];
+	}
+	str[length] = '\0';
+	print_debug("get_rnd_string generated this one: %s", str);
+	return str;
+}
+
+// for decision making
+int get_rnd_bool(uint8_t prob) {
+	if (prob >= 100) {
+		return 1;
+	}
+	if ((rand() % 100) > (100-prob)) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+// for index generation
+int get_rnd_int(int lower_than) {
+	if (lower_than == 0) {
+		return 0;
+	}
+	return rand() % lower_than;
+}
+
+struct Graph* graph_generate() {
+	struct Graph* graph = graph_create();
+	if (NULL == graph) {
+		return NULL;
+	}
+	
+	char *base_name = malloc(sizeof(char)*5);
+	strcpy(base_name, "base");
+	graph_add_vertex(graph, base_name);
+
+	for (size_t i = 0; i < 20; ++i) {
+		char* vertex_name = get_rnd_string(4);
+		int status = graph_add_vertex(graph, vertex_name);
+		if (status == 2) {
+			free_z(vertex_name);
+			continue;
+		}
+
+		
+		int counter = 0;
+		while (1) {
+			char* vertex_name_copy = strnew(vertex_name);
+			int index = get_rnd_int(graph->vertex_list->length);
+			char* adj_vertex = graph->vertex_list->space[index];
+			char* adj_vertex_copy = strnew(adj_vertex);
+			status = graph_add_edge(graph, vertex_name_copy, adj_vertex_copy);
+			if (status == 2) {
+				free_z(adj_vertex_copy);
+				free_z(vertex_name_copy);
+				counter += 1;
+				if (counter > 10) {
+					msg_error("Could not insert new random edge in 10 steps! Graph may be disjoint");
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+	}
+	
+	for (size_t i = 0; i < get_rnd_int(15); ++i) {
+		int first_index = get_rnd_int(20);
+		int second_index = get_rnd_int(20);
+		char* first_vertex_name = graph->vertex_list->space[first_index];
+		char* second_vertex_name = graph->vertex_list->space[second_index];
+
+		char* first_vertex_name_copy = strnew(first_vertex_name);
+		char* second_vertex_name_copy = strnew(second_vertex_name);
+		int status = graph_add_edge(graph, first_vertex_name_copy, second_vertex_name_copy);
+		if (status == 2) {
+			free_z(first_vertex_name_copy);
+			free_z(second_vertex_name_copy);
+		}
+	}
+
+	return graph;
 }
 
 struct Graph* graph_load(char *filename) {

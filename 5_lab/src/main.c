@@ -3,10 +3,14 @@
 #include "tuilib.h"
 #include "structures_interface.h"
 #include "structures.h"
+#include "time.h"
+#include "stdio.h"
 
-#define N_OPS 8
+#define N_OPS 9
 
 int main() {
+	time_t t;
+   	srand((unsigned) time(&t));
 	int save_args[1] = {1};
 	int *print_args = NULL;
 	int delete_vertex_args[1] = {1};
@@ -23,8 +27,9 @@ int main() {
 	struct Op add_vertex_op = {"add_vertex", 1, add_vertex_args, &tuilib_graph_add_vertex, 0, "Adds vertex by name"};
 	struct Op vertex_list_op = {"vertex_list", 0, NULL, &tuilib_graph_vertex_list, 0, "Prints all the vertecies of the graph"};
 	struct Op load_op = {"load", 1, load_args, &tuilib_graph_load, 0, "Loads graph from file, effectively overwriting existing graph"};
+	struct Op generate_op = {"gen", 0, NULL, &tuilib_graph_generate, 0, "Generates random graph, overwriting existing"};
 
-	struct Op operations[N_OPS] = {save_op, print_op, delete_vertex_op, delete_edge_op, add_edge_op, add_vertex_op, vertex_list_op, load_op};
+	struct Op operations[N_OPS] = {save_op, print_op, delete_vertex_op, delete_edge_op, add_edge_op, add_vertex_op, vertex_list_op, load_op, generate_op};
 	struct Graph *graph = graph_create(NULL);
 	void* structure = (void*)graph;
 	int flag = 1;

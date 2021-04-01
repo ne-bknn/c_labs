@@ -1,0 +1,34 @@
+#!/bin/python3
+
+import networkx as nx
+import matplotlib.pyplot as plt
+import sys
+
+def parse_repr(s: str):
+    edgelist = set()
+    s = [s for s in s.split("\n") if s != ""]
+    print(s)
+    for line in s:
+        line = line.split()
+        current = line[0]
+        others = line[2:]
+        for other in others:
+            edgelist.add(tuple(sorted((other, current))))
+
+    return edgelist
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Pass save as first argument")
+        exit(1)
+
+    G = nx.Graph()
+    f = open(sys.argv[1])
+    s = f.read()
+    f.close()
+    edgelist = parse_repr(s)
+    
+    G.add_edges_from(edgelist)
+    nx.draw_networkx(G)
+    plt.show()
+

@@ -9,5 +9,6 @@ void tuilib_graph_add_edge(void **callback_data,void *main_structure);
 void tuilib_graph_add_vertex(void **callback_data,void *main_structure);
 void tuilib_graph_vertex_list(void **callback_data,void *main_structure);
 void tuilib_graph_load(void **callback_data,void *main_structure);
+void tuilib_graph_generate(void **callback_data,void *main_structure);
 
 #endif
