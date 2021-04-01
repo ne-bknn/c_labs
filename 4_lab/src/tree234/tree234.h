@@ -7,12 +7,14 @@ struct Entry {
 
 struct Node {
 	uint8_t is_leaf;
-	struct Entry* keys;
+	struct Entry** keys;
 	struct Node** subtrees;
 	struct Node* parent;
 	uint8_t n_entries;
+	uint8_t n_subtrees;
 };
 
+// bytewise swap. stolen, probably works fine
 #define byteswap(a, b, size)                \
 	do {                                \
 		size_t __size = (size);     \
@@ -30,6 +32,6 @@ void tree_merge();
 void tree_shrink();
 
 uint8_t tree_insert(struct Node* root, uint64_t key, char* data);
-void tree_split();
+uint8_t tree_node_split(struct Node* current_node);
 void tree_delete();
 void tree_save();
