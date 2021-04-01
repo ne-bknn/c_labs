@@ -70,6 +70,9 @@ struct Item* hashtable_find(struct Hashtable* table, char *key) {
 	uint16_t current_hash = initial_hash;
 	while (1) {
 		struct Item* current_item = &table->space[current_hash];
+		if (current_item->is_set == 0 && current_item->skipped == 0) {
+			return NULL;
+		}
 		if (strcmp(current_item->key, key) == 0) {
 			return current_item;
 		}
