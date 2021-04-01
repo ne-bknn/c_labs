@@ -29,7 +29,7 @@ void tree_right_steal();
 void tree_merge();
 void tree_shrink();
 
-void tree_insert();
+uint8_t tree_insert(struct Node* root, uint64_t key, char* data);
 void tree_split();
 void tree_delete();
 void tree_save();
