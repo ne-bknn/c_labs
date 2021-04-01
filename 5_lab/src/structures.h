@@ -24,7 +24,7 @@ struct Hashtable {
 struct Hashtable* hashtable_create();
 uint8_t hashtable_insert(struct Hashtable* table, char *key);
 struct UnorderedVector* hashtable_get(struct Hashtable* table, char *key);
-struct Item* hashtable_find(struct Hashtable* tbale, char *key);
+struct Item* hashtable_find(struct Hashtable* table, char *key);
 uint8_t hashtable_delete_item(struct Hashtable* table, char *key);
 void hashtable_free(struct Hashtable* table);
 
@@ -58,5 +58,23 @@ struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, cha
 struct Graph* graph_generate();
 struct Graph* graph_load(char *filename);
 uint8_t graph_output(struct Graph *graph, char *filename);
+struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, char* vertex_name_2);
+struct Hashtable* graph_do_bfs(struct Graph *graph, char *start);
 
+// Queue
+struct Queue {
+        struct QueueNode* front;
+        struct QueueNode* rear;
+};
+
+struct QueueNode {
+	char *value;
+	struct QueueNode* next;
+};
+
+int queue_is_empty(struct Queue *q);
+void queue_enqueue(struct Queue *q, char* value);
+char* queue_dequeue(struct Queue *q);
+struct Queue* queue_create();
+void queue_free(struct Queue *q);
 #endif

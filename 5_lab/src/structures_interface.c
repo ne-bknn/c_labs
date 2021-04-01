@@ -101,3 +101,24 @@ void tuilib_graph_generate(void **callback_data, void *main_structure) {
 		free_z(new_graph);
 	}
 }
+
+void tuilib_graph_path(void **callback_data, void *main_structure) {
+	struct Graph *graph = (struct Graph*)main_structure;
+	char* vertex_1 = (char*)(callback_data[0]);
+	print_debug("%s", "Created vertex 1");
+	print_debug("vertex_1: %s", vertex_1);
+	char* vertex_2 = (char*)(callback_data[1]);
+	print_debug("vertex_2: %s", vertex_2);
+	char* vertex_1_copy = strnew(vertex_1);
+	print_debug("vertex_1_copy: %s", vertex_1_copy);
+	char* vertex_2_copy = strnew(vertex_2);
+	print_debug("vertex_2_copy: %s", vertex_2_copy);
+	struct UnorderedVector* path = graph_path(graph, vertex_1_copy, vertex_2_copy);
+	if (NULL != path) {
+		msg_success("Shortest path:");
+		vector_print(path);
+		vector_free(path);
+	} else {
+		msg_warn("No such key exists");
+	}
+}

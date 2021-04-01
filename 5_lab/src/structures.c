@@ -148,7 +148,6 @@ void hashtable_free(struct Hashtable *table) {
 			print_debug("In hashtable_free. Freeing key: %p", table->space[i].key);
 			free_z(table->space[i].key);
 			print_debug("%s", "Freeing this vector:");
-			vector_print(table->space[i].v);
 			vector_free(table->space[i].v);
 		}
 	}
@@ -318,7 +317,6 @@ uint8_t graph_add_edge(struct Graph* graph, char* vertex_name_1, char* vertex_na
 		msg_warn("Such an edge already exists");
 		return 2;
 	}
-	print_debug("%s", "Creating edge");	
 	vector_push(first_vector, vertex_name_2);
 	if (strcmp(vertex_name_1, vertex_name_2) != 0) {
 		vector_push(second_vector, vertex_name_1);
@@ -400,7 +398,31 @@ uint8_t graph_delete_vertex(struct Graph* graph, char* vertex_name) {
 
 // struct is called UnorderedVector, but it becomes unordered only because of deletion, so i guess i'll use it here..
 struct UnorderedVector* graph_path(struct Graph* graph, char* vertex_name_1, char* vertex_name_2) {
-	return NULL;
+	print_debug("%s", "Entered graph_path");
+
+	if ((vector_find(graph->vertex_list, vertex_name_1) == -1) || (vector_find(graph->vertex_list, vertex_name_2) == -1)) {
+		return NULL;
+	}
+
+	struct Hashtable* trace = graph_do_bfs(graph, vertex_name_1);
+	if (NULL == trace) {
+		return NULL;
+	}
+	print_debug("%s", "created trace");
+	if (NULL == hashtable_find(trace, vertex_name_2)) {
+		hashtable_free(trace);
+		return NULL;
+	}
+	struct UnorderedVector* path = vector_create();
+	vector_push(path, vertex_name_2);
+	char* next = strnew(hashtable_get(trace, vertex_name_2)->space[0]);
+	while (strcmp(next, vertex_name_1) != 0) {
+		vector_push(path, next);
+		next = strnew(hashtable_get(trace, next)->space[0]);
+	}
+	vector_push(path, next);
+	hashtable_free(trace);
+	return path;
 }
 
 // graph generation utils
@@ -413,7 +435,6 @@ char* get_rnd_string(uint8_t length) {
 		str[i] = array[rand()%52];
 	}
 	str[length] = '\0';
-	print_debug("get_rnd_string generated this one: %s", str);
 	return str;
 }
 
@@ -596,3 +617,101 @@ void graph_free(struct Graph *graph) {
 	hashtable_free(graph->adj_list);
 	free(graph);
 }
+
+// Queue data structure for BFS
+// Partially stolen from https://gist.github.com/jitsceait/d4464143f885d0530eda
+// Luchshe bi sam napisal kak zhe ploho...
+
+int queue_is_empty(struct Queue *q) {
+        if (q->front == NULL && q->rear == NULL) {
+		return 1;
+	}
+        return 0;
+}
+
+void queue_enqueue(struct Queue *q, char* value) {
+        struct QueueNode *temp = mknew(struct QueueNode);
+        temp->value = strnew(value);
+        if (queue_is_empty(q)) {
+                q->front = temp;
+                q->rear = temp;
+        } else {
+                if (q->rear) {
+                        q->rear->next = temp;
+                        q->rear = temp;
+                } else {
+			msg_error("Error in queue occured (q->rear is NULL)");
+			free_z(temp->value);
+			free_z(temp);
+                }
+        }
+}
+
+char* queue_dequeue(struct Queue *q) {
+        if (!queue_is_empty(q)) {
+                char* temp = q->front->value;
+                struct QueueNode *curr = q->front;
+                if (q->front == q->rear) {
+                        q->rear = NULL;
+                        q->front = NULL;
+                }
+                else {
+                        q->front = curr->next;
+                }
+                free_z(curr);
+                return temp;
+        }
+	return NULL;
+}
+
+struct Queue* queue_create() {
+        struct Queue *q = mknew(struct Queue);
+        q->front = NULL;
+        q->rear = NULL;
+	return q;
+}
+
+void queue_free(struct Queue *q) {
+	char* data = queue_dequeue(q);
+	while (NULL != data) {
+		free_z(data);
+		data = queue_dequeue(q);
+	}
+	free_z(q);
+}
+
+struct Hashtable* graph_do_bfs(struct Graph *graph, char* start) {
+	struct Hashtable* trace = hashtable_create();
+	struct Queue* q = queue_create();
+	struct UnorderedVector* visited = vector_create();
+	char* start_copy_1 = strnew(start);
+	char* start_copy_2 = strnew(start);
+	queue_enqueue(q, start_copy_1);
+	vector_push(visited, start_copy_2);
+	while (!queue_is_empty(q)) {
+		char* key = queue_dequeue(q);
+		struct UnorderedVector* neighbors = hashtable_get(graph->adj_list, key);
+		if (NULL == neighbors) {
+			continue;
+		}
+		for (size_t i = 0; i < neighbors->length; ++i) {
+			char* current_neighbor = neighbors->space[i];
+			if (vector_find(visited, current_neighbor) == -1) {
+				char *current_neighbor_copy_1 = strnew(current_neighbor);
+				queue_enqueue(q, current_neighbor_copy_1);
+				char *current_neighbor_copy_2 = strnew(current_neighbor);
+				vector_push(visited, current_neighbor_copy_2);
+				char *current_neighbor_copy_3 = strnew(current_neighbor);
+				hashtable_insert(trace, current_neighbor_copy_3);
+				char *key_copy = strnew(key);
+				struct UnorderedVector* temp = hashtable_get(trace, current_neighbor_copy_3);
+				vector_push(temp, key_copy);
+			}
+		}
+		free_z(key);
+	}
+	queue_free(q);
+	vector_free(visited);
+	return trace;
+}
+

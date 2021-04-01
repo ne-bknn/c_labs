@@ -2,6 +2,7 @@
 
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.drawing.nx_agraph import graphviz_layout
 import sys
 
 def parse_repr(s: str):
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     edgelist = parse_repr(s)
     
     G.add_edges_from(edgelist)
-    nx.draw_networkx(G)
+    pos = graphviz_layout(G, prog="neato")
+    nx.draw_networkx(G, pos, with_labels=True)
     plt.show()
 
