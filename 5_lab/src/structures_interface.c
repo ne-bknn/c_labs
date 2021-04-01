@@ -11,8 +11,7 @@ void tuilib_graph_add_vertex(void **callback_data, void *main_structure) {
 	struct Graph *graph = (struct Graph*)main_structure;
 	char *vertex_1 = (char*)(callback_data[0]);
 	print_debug("tuilib vertex_1 contents: %s", vertex_1);
-	char *data_copy = malloc(sizeof(char)*(strlen(vertex_1)+1));
-	strcpy(data_copy, vertex_1);
+	char *data_copy = strnew(vertex_1);
 	print_debug("tuilib copy contents: %s", data_copy);
 	// TODO: status logic
 	uint8_t status = graph_add_vertex(graph, data_copy);
@@ -79,9 +78,13 @@ void tuilib_graph_load(void **callback_data, void *main_structure) {
 	struct Graph *graph = (struct Graph*)main_structure;
 	char *filename = (char*)(callback_data[0]);
 	struct Graph *new_graph = graph_load(filename);
-	if (NULL == graph) {
+	if (NULL == new_graph) {
 		msg_warn("Error loading graph from file!");
+	} else {
+		hashtable_free(graph->adj_list);
+		vector_free(graph->vertex_list);
+		graph->vertex_list = new_graph->vertex_list;
+		graph->adj_list = new_graph->adj_list;
+		free_z(new_graph);
 	}
-	graph->vertex_list = new_graph->vertex_list;
-	graph->adj_list = new_graph->adj_list;
 }

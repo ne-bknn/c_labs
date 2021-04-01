@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef NE_BKNN_UTILS_H
 #define NE_BKNN_UTILS_H
@@ -19,7 +20,7 @@
 #endif
 
 #define print_debug(fmt, ...) \
-	do { if (DEBUG) { fprintf(stderr, ANSI_COLOR_CYAN"\n%s", "[.] "); fprintf(stderr, fmt, __VA_ARGS__); fprintf(stderr, "%s", ANSI_COLOR_RESET "\n"); } } while (0)
+	do { if (DEBUG) { fprintf(stderr, ANSI_COLOR_CYAN"%s", "[.] "); fprintf(stderr, fmt, __VA_ARGS__); fprintf(stderr, "%s", ANSI_COLOR_RESET "\n"); } } while (0)
 
 #define free_z(p)                \
 	do {                     \
@@ -30,5 +31,11 @@
         } while (0)
 
 #define mknew(t) ((t*)calloc(1, sizeof(t)))
+
+static inline char* strnew(char *original) {
+	char* copy = (char*)malloc((strlen(original)+1)*sizeof(char));
+	strcpy(copy, original);
+	return copy;
+}
 
 #endif

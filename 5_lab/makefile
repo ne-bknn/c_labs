@@ -65,6 +65,7 @@ sanitize: src/*.c src/*.h
 .PHONY: build
 build: src/*.c src/*.h
 	@echo Building
+	#@$(CC) $(ASANFLAGS) $(CFLAGS) $(DEBUGFLAGS) src/*.c -o task.out $(LIBS) 
 	@$(CC) $(ASANFLAGS) $(CFLAGS) $(DEBUGFLAGS) src/*.c -o task.out $(LIBS) 
 
 task.out: build

@@ -138,14 +138,20 @@ uint8_t hashtable_insert(struct Hashtable* table, char *key) {
 
 
 void hashtable_free(struct Hashtable *table) {
+	print_debug("%s", "Entered hashtable_free");
 	for (size_t i = 0; i < HASHTABLE_SPACE_SIZE; ++i) {
 		if (table->space[i].is_set != 0) {
+			print_debug("%s", "Found entry to delete");
+			print_debug("In hashtable_free. Freeing key: %p", table->space[i].key);
 			free_z(table->space[i].key);
+			print_debug("%s", "Freeing this vector:");
+			vector_print(table->space[i].v);
 			vector_free(table->space[i].v);
 		}
 	}
 	free_z(table->space);
 	free_z(table);
+	print_debug("%s", "Exited hashtable_free");
 }
 
 // UnorderedVector of char* 
@@ -173,9 +179,7 @@ struct UnorderedVector* vector_create() {
 }
 
 void vector_push(struct UnorderedVector* vector, char* data) {
-	print_debug("Should i realloc? %u", vector->size <= vector->length);
 	if (vector->size <= vector->length) {
-		print_debug("%s", "reallocing");
 		vector->space = realloc(vector->space, sizeof(char*)*(vector->size*2));
 		if (NULL == vector->space) {
 			msg_error("Failed to realloc vector space!");
@@ -189,11 +193,7 @@ void vector_push(struct UnorderedVector* vector, char* data) {
 
 int64_t vector_find(struct UnorderedVector* vector, char* data) {
 	char** space = vector->space;
-	print_debug("data in vector_find: %s", data);
 	for (size_t i = 0; i < vector->length; ++i) {
-		if (NULL != space[i]) {
-			print_debug("iter+i in vector_find: %s", (space[i]));
-		}
 		if (strcmp(space[i], data) == 0) {
 			return i;
 		}
@@ -217,7 +217,6 @@ uint8_t vector_delete(struct UnorderedVector* vector, size_t index) {
 	// we do not need to move anythin
 	// if 
 	if (index != vector->length) {
-		print_debug("%s", "Freed rightmost element");
 		vector->space[index] = vector->space[vector->length];
 	}
 	
@@ -235,7 +234,9 @@ uint8_t vector_delete(struct UnorderedVector* vector, size_t index) {
 
 void vector_free(struct UnorderedVector* vector) {
 	for (size_t i = 0; i < vector->length; ++i) {
+		print_debug("vector_free: freeing pointer %p", vector->space[i]);
 		free_z(vector->space[i]);
+		print_debug("freed %p", vector->space[i]);
 	}
 	free_z(vector->space);
 	free_z(vector);
@@ -316,7 +317,9 @@ uint8_t graph_add_edge(struct Graph* graph, char* vertex_name_1, char* vertex_na
 	}
 	print_debug("%s", "Creating edge");	
 	vector_push(first_vector, vertex_name_2);
-	vector_push(second_vector, vertex_name_1);
+	if (strcmp(vertex_name_1, vertex_name_2) != 0) {
+		vector_push(second_vector, vertex_name_1);
+	}
 	return 0;
 }
 
@@ -417,31 +420,53 @@ struct Graph* graph_load(char *filename) {
 	// and "error" ifs trigger double free for some reason
 	while (1) {
 		status = fscanf(fp, "%ms", &current_key);
-		if (status != 1) {
-			print_debug("status in graph_load: %d", status);
-			graph_free(graph);
-			return NULL;
+		print_debug("current_key: %s", current_key);
+		if (status == -1) {
+			print_debug("%s", "Hit EOF, exiting");
+			break;
 		}
 		
 		graph_add_vertex(graph, current_key);
 
 		status = fscanf(fp, "%lu", &n_adjacent);
+		print_debug("n_adjacent: %lu", n_adjacent);
 		if (status != 1) {
 			graph_free(graph);
+			fclose(fp);
 			return NULL;
 		}
 
 		for (size_t i = 0; i < n_adjacent; ++i) {
 			status = fscanf(fp, "%ms", &temp_key);
+			print_debug("%s", "before temp_key output");
+			print_debug("temp_key: %s", temp_key);
+			print_debug("%s", "after temp_key output");
 			if (status != 1) {
 				graph_free(graph);
+				fclose(fp);
 				return NULL;
 			}
 			status = graph_add_vertex(graph, temp_key);
-			// deeper logic needed here
-			status = graph_add_edge(graph, current_key, temp_key);
+		// deeper logic needed here
+			char* current_key_copy = strnew(current_key);
+			print_debug("graph_load, current_key, temp_key: %p, %p", current_key, temp_key);
+			print_debug("graph_load, current_key_copy: %s, %p", current_key_copy, current_key_copy);
+			char* temp_key_copy = strnew(temp_key);
+			if (status == 2) {
+				// value is not inserted and will be lost 
+				free_z(temp_key);
+			}
+			print_debug("graph_load, temp_key_copy: %s, %p", temp_key_copy, temp_key_copy);
+			status = graph_add_edge(graph, current_key_copy, temp_key_copy);
+			if (status == 2) {
+				// keys are not inserted and will be lost
+				free_z(current_key_copy);
+				free_z(temp_key_copy);
+			}
 		}
 	}
+	print_debug("%s", "closing fp in graph_load");
+	fclose(fp);
 	return graph;	
 }
 
@@ -477,4 +502,5 @@ void graph_free(struct Graph *graph) {
 	print_debug("Entered graph_free with pointer: %p", (void*)graph);
 	vector_free(graph->vertex_list);
 	hashtable_free(graph->adj_list);
+	free(graph);
 }
