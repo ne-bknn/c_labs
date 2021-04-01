@@ -1,0 +1,19 @@
+digraph {
+	a1 [shape=record, label="{20|50}"];
+	a2 [shape=record, label="{10|15}"];
+	a3 [shape=record, label="{1|2}"];
+	a4 [shape=record, label="{25}"];
+	a5 [shape=record, label="{21|22|23}"];
+	a6 [shape=record, label="{30|35}"];
+	a7 [shape=record, label="{100}"];
+	a8 [shape=record, label="{99}"];
+	a9 [shape=record, label="{101}"];
+	a1 -> a2;
+	a2 -> a3;
+	a1 -> a4;
+	a4 -> a5;
+	a4 -> a6;
+	a1 -> a7;
+	a7 -> a8;
+	a7 -> a9;
+}
