@@ -37,7 +37,7 @@ struct Table* table_create() {
 
 	return table;
 }
-
+/*
 struct ExtendedTable* table_extend(struct Table* table) {
 	struct ExtendedTable* ex_table = malloc(sizeof(struct ExtendedTable));
 	if (NULL == ex_table) {
@@ -52,8 +52,8 @@ struct ExtendedTable* table_extend(struct Table* table) {
 struct ExtendedTable* table_load(struct ExtendedTable *ex_table, char *filename) {
 	return NULL;
 }
-
-
+*/
+/*
 // 1 - success, 2 - no filename assigned, 3 - file opening error, 4 - error writing to file
 uint8_t table_save(struct ExtendedTable* ex_table) {
 	if (NULL == ex_table->filename) {
@@ -75,7 +75,7 @@ uint8_t table_save(struct ExtendedTable* ex_table) {
 	}
 	return 0;
 }
-
+*/
 void table_delete(struct Table* table) {
 	for (size_t i = 0; i < table->space_size; ++i) {
 		if (table->space1[i].is_set != 0) {

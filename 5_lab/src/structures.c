@@ -516,6 +516,15 @@ struct Graph* graph_generate() {
 		}
 	}
 
+	int index = get_rnd_int(20);
+	char* vertex_name = malloc(sizeof(char)*6);
+	char* name_copy = strnew(graph->vertex_list->space[index]);
+	
+	strcpy(vertex_name, "qwert");
+	char* vertex_copy = strnew(vertex_name);
+	graph_add_vertex(graph, vertex_copy);
+	graph_add_edge(graph, name_copy, vertex_name);
+
 	return graph;
 }
 

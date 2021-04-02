@@ -25,7 +25,7 @@ UNITYFLAGS = -DUNITY_SUPPORT_64
 
 AFLFLAGS = -Ofast
 
-DEBUGFLAGS = -g
+DEBUGFLAGS = -pg
 
 default: build
 
@@ -66,7 +66,7 @@ sanitize: src/*.c src/*.h
 build: src/*.c src/*.h
 	@echo Building
 	#@$(CC) $(ASANFLAGS) $(CFLAGS) $(DEBUGFLAGS) src/*.c -o task.out $(LIBS) 
-	@$(CC) $(ASANFLAGS) $(CFLAGS) $(DEBUGFLAGS) src/*.c -o task.out $(LIBS) 
+	@$(CC) $(CFLAGS) $(DEBUGFLAGS) src/*.c -o task.out $(LIBS) 
 
 task.out: build
 

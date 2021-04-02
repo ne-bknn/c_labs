@@ -37,11 +37,11 @@ void tuilib_item_get(void **callback_data, void *main_structure) {
 	}
 	item_print(item);
 }
-
+/*
 void tuilib_table_save(void **callback_data, void *main_structure) {
 	struct ExtendedTable *ex_table = (struct ExtendedTable*)main_structure;
 }
-
+*/
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 void tuilib_table_print(void **callback_data, void *main_structure) {
