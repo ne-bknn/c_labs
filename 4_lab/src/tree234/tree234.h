@@ -4,6 +4,10 @@
 
 #include "../tuilib.h"
 
+struct BTree {
+	struct Node* root;
+};
+
 struct Entry {
 	uint64_t key;
 	char* data;
