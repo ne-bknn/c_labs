@@ -1,4 +1,8 @@
 #include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "../tuilib.h"
 
 struct Entry {
 	uint64_t key;
@@ -26,12 +30,25 @@ struct Node {
         	} while (--__size > 0);     \
     	} while (0)
 
+
+static inline void nullcheck(void* ptr, const char* name) {
+	if (NULL == ptr) {
+		printf(ANSI_COLOR_RED "[!] %s is null" ANSI_COLOR_RESET, name);
+	}
+}
+
 void tree_left_steal();
 void tree_right_steal();
 void tree_merge();
 void tree_shrink();
 
-uint8_t tree_insert(struct Node* root, uint64_t key, char* data);
-uint8_t tree_node_split(struct Node* current_node);
+enum InsertStatus {
+	InsertSuccess,
+	InsertSameKey,
+	InsertFatal
+};
+enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data);
+
+struct Node* tree_node_split(struct Node* current_node);
 void tree_delete();
 void tree_save();

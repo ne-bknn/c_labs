@@ -47,7 +47,7 @@ uint8_t tree_internal_insert(struct Node* current_node, struct Entry* new_entry)
 	current_node->n_entries++;
 }
 
-uint8_t tree_node_split(struct Node* current_node) {
+struct Node* tree_node_split(struct Node* current_node) {
 	if (current_node->n_entries != 3) {
 		msg_error("Trying to split not full node");
 		exit(1);
@@ -82,16 +82,17 @@ uint8_t tree_node_split(struct Node* current_node) {
 	}
 }
 
-uint8_t tree_insert(struct Node* root, uint64_t key, char* data) {
-	if (NULL == root) {
-		root = mknew(struct Node);
-		root->is_leaf = 1;
-		root->keys = calloc(3, sizeof(struct Entry*));
-		root->subtrees = calloc(4, sizeof(struct Node*));
-		root->parent = NULL;
-		root->n_entries = 0;
-	}
+struct Node* tree_create() {
+	struct Node* root = mknew(struct Node);
+	root->is_leaf = 1;
+	root->keys = calloc(3, sizeof(struct Entry*));
+	root->subtrees = calloc(4, sizeof(struct Node*));
+	root->parent = NULL;
+	root->n_entries = 0;
 
+}
+
+enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data) {
 	struct Entry* new_entry = mknew(struct Entry);
 	new_entry->key = key;
 	new_entry->data = data;
@@ -99,12 +100,56 @@ uint8_t tree_insert(struct Node* root, uint64_t key, char* data) {
 	struct Node* current_node = root;
 
 	while (!current_node->is_leaf) {
-		// find leaf in which we are going
-		// to insert
-		// splitting occurs here, too
+		// splitting while going down
+		if (current_node->n_entries == 3) {
+			current_node = tree_node_split(current_node);
+		}
+		
+		// searching
+		if (current_node->n_entries == 1) {
+			if (current_node->keys[0]->key == key) {
+				free_z(data);
+				free_z(new_entry);
+				return InsertSameKey;
+			}
+			// TODO: null checks
+			// can null be here? didn't we create needed subtrees during splitting?
+			// null in subtree can be in leaf only and if it is a leaf
+			// we do not enter this loop
+			if (current_node->keys[0]-> key < key) {
+				nullcheck(current_node->subtrees[0], "subtree[0]");
+				current_node = current_node->subtrees[0];
+			} else {
+				nullcheck(current_node->subtrees[1], "subtree[1]");
+				current_node = current_node->subtrees[1];
+			}
+		} else if (current_node->n_entries == 2) {
+			if (current_node->keys[0]->key < key) {
+				nop();
+			} else if (current_node->keys[0]->key == key) {
+				free_z(data);
+				free_z(new_entry);
+				return InsertSameKey;
+			} else if (current_node->keys[1]->key < key) {
+				nop();
+			} else if (current_node->keys[1]->key == key) {
+				free_z(data);
+				free_z(new_entry);
+				return InsertSameKey;
+			} else {
+				nop();
+			}
+		} else {
+			msg_error("Found unsplit node where should not!");
+			exit(1);
+		}
 	}
 	// we found the leaf and it is current_node
 	// we didn't split the leaf, we have to do it here
+	//
+	// 04.04, 3 AM: actually no, i need to split leaf in
+	// while loop so there will be no need to reimplement
+	// searching the actual leaf
 	tree_internal_insert(current_node, new_entry);
 	return 0;
 }
