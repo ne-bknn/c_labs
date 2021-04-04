@@ -9,7 +9,7 @@
 // 0 on success, exits on major error
 // (improper splitting, inserting in non-leaf)
 // 1 on same key
-uint8_t tree_internal_insert(struct Node* current_node, struct Entry* new_entry) {
+uint8_t btree_nonfull_insert(struct Node* current_node, struct Entry* new_entry) {
 	if (current_node->n_entries == 3) {
 		msg_error("Using internal insert with full node!");
 		exit(1);
@@ -47,7 +47,7 @@ uint8_t tree_internal_insert(struct Node* current_node, struct Entry* new_entry)
 	current_node->n_entries++;
 }
 
-struct Node* tree_node_split(struct Node* current_node) {
+struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 	if (current_node->n_entries != 3) {
 		msg_error("Trying to split not full node");
 		exit(1);
@@ -55,7 +55,7 @@ struct Node* tree_node_split(struct Node* current_node) {
 	struct Entry* median = current_node->keys[1];
 	if (NULL != current_node->parent) {
 		// splitting non-parent node
-		tree_internal_insert(current_node->parent, median);
+		btree_nonfull_insert(current_node->parent, median);
 		byteswap(current_node->keys[1], current_node->keys[2], sizeof(struct Entry*));
 		current_node->n_entries = 2;
 	} else {
@@ -66,6 +66,18 @@ struct Node* tree_node_split(struct Node* current_node) {
 		//
 		// Smh I need to overwrite global pointer to 
 		// root node. need a struct with a pointer to a node? or just pointer to a pointer to a node?
+		
+		// Not-so-obvious idea from CLRS - we just overwriting root node in tree strucutre,
+		// assigning new root as a parent of previous one
+		// and call split again inside. cool.
+		struct Node* new_root = mknew(struct Node);
+		btree->root = new_root;
+		current_node->parent = new_root;
+		struct Node* parent = btree_node_split(current_node, btree);	
+		return parent;
+		// looks so much prettier
+
+		/*
 		struct Node* new_root = mknew(struct Node);
 		new_root->is_leaf = 0;
 		new_root->keys = calloc(3, sizeof(struct Entry*));
@@ -79,6 +91,7 @@ struct Node* tree_node_split(struct Node* current_node) {
 		left_node->keys = calloc(3, sizeof(struct Entry*));
 		left_node->subtrees = calloc(4, sizeof(struct Node*));
 		left_node->parent = new_root;
+		*/
 	}
 }
 
