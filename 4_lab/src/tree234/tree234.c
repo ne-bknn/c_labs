@@ -95,14 +95,16 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 	}
 }
 
-struct Node* tree_create() {
+struct BTree* tree_create() {
+	struct BTree* btree = mknew(struct BTree);
 	struct Node* root = mknew(struct Node);
 	root->is_leaf = 1;
 	root->keys = calloc(3, sizeof(struct Entry*));
 	root->subtrees = calloc(4, sizeof(struct Node*));
 	root->parent = NULL;
 	root->n_entries = 0;
-
+	btree->root = root;
+	return btree;
 }
 
 enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data) {

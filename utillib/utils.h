@@ -16,11 +16,11 @@
 #endif
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 #define print_debug(fmt, ...) \
-	do { if (DEBUG) { fprintf(stderr, ANSI_COLOR_CYAN"%s", "[.] "); fprintf(stderr, fmt, __VA_ARGS__); fprintf(stderr, "%s", ANSI_COLOR_RESET "\n"); } } while (0)
+	do { if (DEBUG) { fprintf(stderr, ANSI_COLOR_CYAN"%s %s:%s:%d " , "[.] ", __FILE__, __func__, __LINE__); fprintf(stderr, fmt, __VA_ARGS__); fprintf(stderr, "%s", ANSI_COLOR_RESET "\n"); } } while (0)
 
 #define free_z(p)                \
 	do {                     \
