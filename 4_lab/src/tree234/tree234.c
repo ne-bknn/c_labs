@@ -127,10 +127,31 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 		right->is_leaf = current_node->is_leaf;
 
 		left->subtrees[0] = current_node->subtrees[0];
+		if (NULL == left->subtrees[0]) {
+			left->subtrees[0] = btree_node_create();
+		}
+		left->subtrees[0]->parent = left;
+		
 		left->subtrees[1] = current_node->subtrees[1];
+		if (NULL == left->subtrees[1]) {
+			left->subtrees[1] = btree_node_create();
+		}
+		left->subtrees[1]->parent = left;
+
 		left->n_subtrees = 2;
+		
 		right->subtrees[0] = current_node->subtrees[2];
+		if (NULL == right->subtrees[0]) {
+			right->subtrees[0] = btree_node_create();
+		}
+		right->subtrees[0]->parent = right;
+
 		right->subtrees[1] = current_node->subtrees[3];
+		if (NULL == right->subtrees[1]) {
+			right->subtrees[1] = btree_node_create();
+		}
+		right->subtrees[1]->parent = right;
+
 		right->n_subtrees = 2;
 
 		
@@ -143,6 +164,8 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 		// and lots of if elses.. i dunno how to make this more efficient, duh
 		// this should be rewritten TODO, but currently I do not understand how
 		struct Node* parent = current_node->parent;
+		left->parent = parent;
+		right->parent = parent;
 		if (size == 3) {
 			if (index == 0) {
 				// inserted in the beginning
@@ -237,7 +260,7 @@ enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t 
 
 	while (!current_node->is_leaf || current_node->n_entries == 3) {
 		// splitting while going down
-		if (current_node->n_entries == 3) {
+		while (current_node->n_entries == 3) {
 			current_node = btree_node_split(current_node, btree);
 		}
 		
@@ -280,6 +303,7 @@ enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t 
 			}
 		} else {
 			msg_error("Found unsplit node where should not!");
+			print_debug("n_entries: %d\n", current_node->n_entries);
 			exit(1);
 		}
 	}
@@ -328,4 +352,50 @@ struct Entry* btree_search(struct BTree* btree, uint64_t key) {
 
 void btree_entry_print(struct Entry* entry) {
 	printf("Key: %"PRIu64", data: %s\n", entry->key, entry->data);
+}
+
+int btree_internal_write(struct Node* node, FILE *fp, int counter, int parent_index) {
+	counter = counter + 1;
+	int my_index = counter;
+	if (NULL == fp) {
+		msg_error("fp is null in btree_internal_write");
+		exit(1);
+	}
+	if (node->n_entries == 1) {
+		fprintf(fp, "\ta%03d [shape=record, label=\"{%"PRIu64"}\"];\n", counter, node->keys[0]->key);
+	} else if (node->n_entries == 2) {
+		fprintf(fp, "\ta%03d [shape=record, label=\"{%"PRIu64"|%"PRIu64"}\"];\n", counter, node->keys[0]->key, node->keys[1]->key);
+	} else {
+		fprintf(fp, "\ta%03d [shape=record, label=\"{%"PRIu64"|%"PRIu64"|%"PRIu64"}\"];\n", counter, node->keys[0]->key, node->keys[1]->key, node->keys[2]->key);
+	}
+	if (NULL != node->parent) {
+		fprintf(fp, "\ta%03d -> a%03d;\n", counter+1, parent_index);
+	}
+	if (!node->is_leaf) {
+		for (size_t i = 0; i < node->n_subtrees; ++i) {
+			counter = btree_internal_write(node->subtrees[i], fp, counter, my_index);
+		}
+	}
+	return counter;
+}
+
+
+void btree_save(struct BTree*  btree, int index) {
+	FILE *fp;
+	if (index > 1000) {
+		msg_warn("index is greater than 1000, tweak btree_save");
+	}
+	char* filename = malloc(20);
+	sprintf(filename, "save%d.dot", index);
+	if (NULL != filename) {
+		fp = fopen(filename, "w");
+	} else {
+		msg_error("Filename is NULL somehow...");
+		exit(1);
+	}
+	fprintf(fp, "digraph {\n");
+
+	btree_internal_write(btree->root, fp, 0, 0);
+	fprintf(fp, "}");
+	fclose(fp);
 }

@@ -70,5 +70,5 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree);
 struct Entry* btree_search(struct BTree* btree, uint64_t key);
 void btree_entry_print(struct Entry* entry);
 void tree_delete();
-void tree_save();
+void btree_save(struct BTree *btree, int index);
 struct BTree* btree_create();
