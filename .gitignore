@@ -57,3 +57,4 @@ fuzzing/
 logs/
 tags
 .gdb_history
+tests/
