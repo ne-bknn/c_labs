@@ -21,7 +21,7 @@ int main() {
 	srand(228);
 	struct BTree* btree = btree_create();
 
-	for (size_t i = 0; i < 10; ++i) {
+	for (size_t i = 0; i < 50; ++i) {
 		char* data = malloc(10);
 		strcpy(data, "qwerqwera");
 		int index = get_rnd_int(100);

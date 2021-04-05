@@ -32,3 +32,4 @@ clean:
 	-@rm logs/* 2>/dev/null || true
 	-@rm core.* 2>/dev/null || true
 	-@rm -r fuzzing/sync/* 2>/dev/null || true
+	-@rm *.dot 2>/dev/null || true

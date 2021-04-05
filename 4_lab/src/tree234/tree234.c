@@ -369,7 +369,7 @@ int btree_internal_write(struct Node* node, FILE *fp, int counter, int parent_in
 		fprintf(fp, "\ta%03d [shape=record, label=\"{%"PRIu64"|%"PRIu64"|%"PRIu64"}\"];\n", counter, node->keys[0]->key, node->keys[1]->key, node->keys[2]->key);
 	}
 	if (NULL != node->parent) {
-		fprintf(fp, "\ta%03d -> a%03d;\n", counter+1, parent_index);
+		fprintf(fp, "\ta%03d -> a%03d;\n", parent_index, counter);
 	}
 	if (!node->is_leaf) {
 		for (size_t i = 0; i < node->n_subtrees; ++i) {
