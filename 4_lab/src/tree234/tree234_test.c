@@ -7,9 +7,18 @@
 
 int main() {
 	struct BTree* btree = btree_create();
-	char* data = malloc(10);
-	strcpy(data, "qwerqwera");
-	btree_insert(btree->root, btree, 228, data);
-	printf("Yay\n");
+	for (size_t i = 0; i < 10; ++i) {
+		char* data = malloc(10);
+		strcpy(data, "qwerqwera");
+		btree_insert(btree->root, btree, i*3, data);
+	}
+	for (size_t i = 0; i < 10; ++i) {
+		struct Entry* entry = btree_search(btree, i*3);
+		if (NULL != entry) {
+			btree_entry_print(entry);
+		} else {
+			printf("%lu not found", i*3);
+		}
+	}
 	return 0;
 }

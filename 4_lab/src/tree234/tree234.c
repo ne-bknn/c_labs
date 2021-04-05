@@ -60,7 +60,6 @@ struct NFInsertStatus btree_nonfull_insert(struct Node* current_node, struct Ent
 		}
 		if (current_node->keys[0]->key > new_entry->key) {
 			byteswap((void*)current_node->keys[0], (void*)current_node->keys[1], sizeof(struct Entry*));
-			status.status = Success;
 			status.a = 0;
 		} else {
 			status.a = 1;
@@ -80,9 +79,14 @@ struct NFInsertStatus btree_nonfull_insert(struct Node* current_node, struct Ent
 			byteswap((void*)current_node->keys[1], (void*)current_node->keys[2], sizeof(struct Entry*));
 			if (current_node->keys[0]->key > current_node->keys[1]->key) {
 				byteswap((void*)current_node->keys[0], (void*)current_node->keys[1], sizeof(struct Entry*));
+				status.a = 0;
+			} else {
+				status.a = 1;
 			}
-
+		} else {
+			status.a = 2;
 		}
+		status.b = 3;
 	}
 	current_node->n_entries++;
 	// this should return
@@ -124,8 +128,10 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 
 		left->subtrees[0] = current_node->subtrees[0];
 		left->subtrees[1] = current_node->subtrees[1];
+		left->n_subtrees = 2;
 		right->subtrees[0] = current_node->subtrees[2];
 		right->subtrees[1] = current_node->subtrees[3];
+		right->n_subtrees = 2;
 
 		
 		// inserting in empty nodes
@@ -144,15 +150,18 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 				parent->subtrees[2] = parent->subtrees[1];
 				parent->subtrees[1] = right;
 				parent->subtrees[0] = left;
+				parent->n_subtrees = 4;
 			} else if (index == 1) {
 				// inserted in the middle
 				parent->subtrees[3] = parent->subtrees[2];
 				parent->subtrees[2] = right;
 				parent->subtrees[1] = left;
+				parent->n_subtrees = 4;
 			} else if (index == 2) {
 				// inserted in the end
 				parent->subtrees[3] = right;
 				parent->subtrees[2] = left;
+				parent->n_subtrees = 4;
 			} else {
 				msg_error("Cannot handle such an index!");
 				exit(1);
@@ -164,9 +173,11 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 				parent->subtrees[2] = parent->subtrees[1];
 				parent->subtrees[1] = right;
 				parent->subtrees[0] = left;
+				parent->n_subtrees = 3;
 			} else if (index == 1) {
 				parent->subtrees[2] = right;
 				parent->subtrees[1] = left;
+				parent->n_subtrees = 3;
 			} else {
 				msg_error("Could not handle such index!");
 				exit(1);
@@ -178,6 +189,7 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 			}
 			parent->subtrees[0] = left;
 			parent->subtrees[1] = right;
+			parent->n_subtrees = 2;
 		} else {
 			msg_error("Cannot handle this size! node_split");
 			exit(1);
@@ -187,8 +199,10 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 		// Not-so-obvious idea from CLRS - we just overwriting root node in tree strucutre,
 		// assigning new root as a parent of previous one
 		// and call split again inside. cool.
-		struct Node* new_root = mknew(struct Node);
+		struct Node* new_root = btree_node_create();
 		btree->root = new_root;
+		new_root->subtrees[0] = current_node;
+		new_root->n_subtrees = 1;
 		current_node->parent = new_root;
 		struct Node* parent = btree_node_split(current_node, btree);	
 		return parent;
@@ -278,4 +292,30 @@ enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t 
 	return 0;
 }
 
+struct Entry* btree_search(struct BTree* btree, uint64_t key) {
+	struct Node* current_node = btree->root;
+	// rolling while true; continuing on new subtree, breaking
+	// on find not found
+	while (1) {
+		for (size_t i = 0; i < current_node->n_entries; ++i) {
+			if (current_node->keys[i]->key < key) {
+				// new subtree
+				if (current_node->is_leaf) {
+					// there is no such key
+					return NULL;
+				}
+				current_node = current_node->subtrees[0];
+				continue;
+			}
+			if (current_node->keys[i]->key == key) {
+				// found
+				return current_node->keys[i];
+			}
+		}
+		current_node = current_node->subtrees[current_node->n_entries];
+	}
+}
 
+void btree_entry_print(struct Entry* entry) {
+	printf("Key: %"PRIu64", data: %s", entry->key, entry->data);
+}
