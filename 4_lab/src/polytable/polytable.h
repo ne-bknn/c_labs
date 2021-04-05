@@ -25,3 +25,14 @@ void* polytable_get(struct Polytable* table, uint8_t key);
 void polytable_delete(struct Polytable* table);
 void polytable_print(struct Polytable* table);
 #endif
+
+#ifndef POLYTABLE_INTERFACE_H
+#define POLYTABLE_INTERFACE_H
+
+#include "polytable.h"
+
+void tuilib_polytable_insert(void** args, void* main_structure);
+void tuilib_polytable_get(void** args, void* main_structure);
+void tuilib_polytable_print(void** args, void* main_structure);
+
+#endif
