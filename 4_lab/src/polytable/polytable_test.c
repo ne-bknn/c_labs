@@ -1,4 +1,4 @@
-#include "tuilib.h"
+#include "../tuilib.h"
 #include "polytable_interface.h"
 
 int main() {
