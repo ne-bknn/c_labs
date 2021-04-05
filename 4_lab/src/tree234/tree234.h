@@ -17,6 +17,7 @@ struct NFInsertStatus {
 
 struct BTree {
 	struct Node* root;
+	uint64_t n_elems;
 };
 
 struct Entry {

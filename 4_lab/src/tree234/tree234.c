@@ -216,6 +216,7 @@ struct BTree* btree_create() {
 	root->is_leaf = 1;
 	root->parent = NULL;
 	btree->root = root;
+	btree->n_elems = 0;
 	return btree;
 }
 
@@ -289,7 +290,8 @@ enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t 
 	// while loop so there will be no need to reimplement
 	// searching the actual leaf
 	btree_nonfull_insert(current_node, new_entry);
-	return 0;
+	btree->n_elems++;
+	return InsertSuccess;
 }
 
 struct Entry* btree_search(struct BTree* btree, uint64_t key) {
@@ -297,25 +299,33 @@ struct Entry* btree_search(struct BTree* btree, uint64_t key) {
 	// rolling while true; continuing on new subtree, breaking
 	// on find not found
 	while (1) {
-		for (size_t i = 0; i < current_node->n_entries; ++i) {
-			if (current_node->keys[i]->key < key) {
+		uint8_t flag = 0;
+		for (uint8_t i = 0; i < current_node->n_entries; ++i) {
+			print_debug("%s", "i < current_node->n_entries");
+			if (current_node->keys[i]->key > key) {
 				// new subtree
 				if (current_node->is_leaf) {
 					// there is no such key
 					return NULL;
 				}
-				current_node = current_node->subtrees[0];
-				continue;
+				current_node = current_node->subtrees[i];
+				flag = 1;
+				break;
 			}
 			if (current_node->keys[i]->key == key) {
 				// found
 				return current_node->keys[i];
 			}
 		}
-		current_node = current_node->subtrees[current_node->n_entries];
+		if (!flag) {
+			current_node = current_node->subtrees[current_node->n_entries];
+			if (NULL == current_node) {
+				return NULL;
+			}
+		}
 	}
 }
 
 void btree_entry_print(struct Entry* entry) {
-	printf("Key: %"PRIu64", data: %s", entry->key, entry->data);
+	printf("Key: %"PRIu64", data: %s\n", entry->key, entry->data);
 }

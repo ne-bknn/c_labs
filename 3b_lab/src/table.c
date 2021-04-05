@@ -335,9 +335,7 @@ void item_print(struct Table *table, struct Item* item) {
 	fread(temp, sizeof(char), item->info_length, fp);
 	temp[item->info_length] = '\0';
 
-	print_debug("%s", "Before print");	
 	printf("Key #1: %"PRIu32" Key #2: %"PRIu32" Index #1: %"PRIu16" Index #2: %"PRIu16" Data: %s\n", item->key1, item->key2, item->index1, item->index2, temp);
-	print_debug("%s", "After print");	
 	free(temp);
 }
 

@@ -50,8 +50,8 @@ int vector_pop(struct Vector* vector) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 void* tuilib_vector_pop(void** args, void* main_structure) {
-	print_debug("%s", "Vector pop");
 #pragma clang diagnostic pop
+	print_debug("%s", "Vector pop");
 	struct Vector* v = (struct Vector*)main_structure;
 	int *value = malloc(sizeof(int));
 	*value = vector_pop(v);
