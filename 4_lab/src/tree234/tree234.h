@@ -4,6 +4,17 @@
 
 #include "../tuilib.h"
 
+enum Status {
+	Success,
+	SameKey,
+};
+
+struct NFInsertStatus {
+	enum Status status;
+	uint8_t a;
+	uint8_t b;
+};
+
 struct BTree {
 	struct Node* root;
 };
