@@ -62,8 +62,9 @@ enum InsertStatus {
 	InsertSameKey,
 	InsertFatal
 };
-enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data);
-
-struct Node* tree_node_split(struct Node* current_node);
+enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t key, char* data);
+struct Node* btree_node_create();
+struct Node* btree_node_split(struct Node* current_node, struct BTree* btree);
 void tree_delete();
 void tree_save();
+struct BTree* btree_create();

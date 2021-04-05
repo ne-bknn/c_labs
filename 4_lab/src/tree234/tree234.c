@@ -59,7 +59,7 @@ struct NFInsertStatus btree_nonfull_insert(struct Node* current_node, struct Ent
 			return status;
 		}
 		if (current_node->keys[0]->key > new_entry->key) {
-			byteswap(current_node->keys[0], current_node->keys[1], sizeof(struct Entry*));
+			byteswap((void*)current_node->keys[0], (void*)current_node->keys[1], sizeof(struct Entry*));
 			status.status = Success;
 			status.a = 0;
 		} else {
@@ -77,9 +77,9 @@ struct NFInsertStatus btree_nonfull_insert(struct Node* current_node, struct Ent
 	
 		current_node->keys[2] = new_entry;
 		if (current_node->keys[1]->key > new_entry->key) {
-			byteswap(current_node->keys[1], current_node->keys[2], sizeof(struct Entry*));
+			byteswap((void*)current_node->keys[1], (void*)current_node->keys[2], sizeof(struct Entry*));
 			if (current_node->keys[0]->key > current_node->keys[1]->key) {
-				byteswap(current_node->keys[0], current_node->keys[1], sizeof(struct Entry*));
+				byteswap((void*)current_node->keys[0], (void*)current_node->keys[1], sizeof(struct Entry*));
 			}
 
 		}
@@ -108,13 +108,25 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 		// cannot make it generic, will be too verbose for no reason for this usage
 		// should nonfull_insert return something that 
 		// will help me to sort pointers?
-		btree_nonfull_insert(current_node->parent, median);
+		struct NFInsertStatus status = btree_nonfull_insert(current_node->parent, median);
+		if (status.status == SameKey) {
+			msg_error("SameKey in split, this should not happen");
+			exit(1);
+		}
+		uint8_t index = status.a;
+		uint8_t size = status.b;
 
-		struct Node* left = mknew(struct Node);
-		struct Node* right = mknew(struct Node);
+		struct Node* left = btree_node_create();
+		struct Node* right = btree_node_create();
 		
 		left->is_leaf = current_node->is_leaf;
 		right->is_leaf = current_node->is_leaf;
+
+		left->subtrees[0] = current_node->subtrees[0];
+		left->subtrees[1] = current_node->subtrees[1];
+		right->subtrees[0] = current_node->subtrees[2];
+		right->subtrees[1] = current_node->subtrees[3];
+
 		
 		// inserting in empty nodes
 		btree_nonfull_insert(left, current_node->keys[0]);
@@ -123,17 +135,55 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 		// now we have two pointers that we need to insert in current_node->parent
 		// btree_nonfull_insert should return index of insertion and the amount of elements
 		// and lots of if elses.. i dunno how to make this more efficient, duh
-		
-
+		// this should be rewritten TODO, but currently I do not understand how
+		struct Node* parent = current_node->parent;
+		if (size == 3) {
+			if (index == 0) {
+				// inserted in the beginning
+				parent->subtrees[3] = parent->subtrees[2];
+				parent->subtrees[2] = parent->subtrees[1];
+				parent->subtrees[1] = right;
+				parent->subtrees[0] = left;
+			} else if (index == 1) {
+				// inserted in the middle
+				parent->subtrees[3] = parent->subtrees[2];
+				parent->subtrees[2] = right;
+				parent->subtrees[1] = left;
+			} else if (index == 2) {
+				// inserted in the end
+				parent->subtrees[3] = right;
+				parent->subtrees[2] = left;
+			} else {
+				msg_error("Cannot handle such an index!");
+				exit(1);
+			}
+			// yep i see the pattern, still dunno how to write it less verbose
+		} else if (size == 2) {
+			if (index == 0) {
+				// inserted in the beginning
+				parent->subtrees[2] = parent->subtrees[1];
+				parent->subtrees[1] = right;
+				parent->subtrees[0] = left;
+			} else if (index == 1) {
+				parent->subtrees[2] = right;
+				parent->subtrees[1] = left;
+			} else {
+				msg_error("Could not handle such index!");
+				exit(1);
+			}
+		} else if (size == 1) {
+			if (index != 0) {
+				msg_error("Could not handle such index!");
+				exit(1);
+			}
+			parent->subtrees[0] = left;
+			parent->subtrees[1] = right;
+		} else {
+			msg_error("Cannot handle this size! node_split");
+			exit(1);
+		}
+		return parent;
 	} else {
-		// easiest case - we are splitting root
-		// just create new root, set median entry to key
-		// set first and second subtree to left node
-		// and third and fourth subtrees to right node
-		//
-		// Smh I need to overwrite global pointer to 
-		// root node. need a struct with a pointer to a node? or just pointer to a pointer to a node?
-		
 		// Not-so-obvious idea from CLRS - we just overwriting root node in tree strucutre,
 		// assigning new root as a parent of previous one
 		// and call split again inside. cool.
@@ -142,49 +192,38 @@ struct Node* btree_node_split(struct Node* current_node, struct BTree* btree) {
 		current_node->parent = new_root;
 		struct Node* parent = btree_node_split(current_node, btree);	
 		return parent;
-		// looks so much prettier
-
-		/*
-		struct Node* new_root = mknew(struct Node);
-		new_root->is_leaf = 0;
-		new_root->keys = calloc(3, sizeof(struct Entry*));
-		new_root->subtrees = calloc(4, sizeof(struct Node*));
-		new_root->parent = NULL;
-		new_root->n_entries = 1;
-		new_root->n_subtrees = 2;
-
-		struct Node* left_node = mknew(struct Node);
-		left_node->is_leaf = 0;
-		left_node->keys = calloc(3, sizeof(struct Entry*));
-		left_node->subtrees = calloc(4, sizeof(struct Node*));
-		left_node->parent = new_root;
-		*/
 	}
+	// TODO: memory is definitely leaking, we are not freeing splitted Node
 }
 
-struct BTree* tree_create() {
+struct BTree* btree_create() {
 	struct BTree* btree = mknew(struct BTree);
-	struct Node* root = mknew(struct Node);
+	struct Node* root = btree_node_create();
 	root->is_leaf = 1;
-	root->keys = calloc(3, sizeof(struct Entry*));
-	root->subtrees = calloc(4, sizeof(struct Node*));
 	root->parent = NULL;
-	root->n_entries = 0;
 	btree->root = root;
 	return btree;
 }
 
-enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data) {
+struct Node* btree_node_create() {
+	struct Node* node = mknew(struct Node);
+	node->keys = calloc(3, sizeof(struct Entry*));
+	node->subtrees = calloc(4, sizeof(struct Node*));
+	node->n_entries = 0;
+	return node;
+}
+
+enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t key, char* data) {
 	struct Entry* new_entry = mknew(struct Entry);
 	new_entry->key = key;
 	new_entry->data = data;
 	
 	struct Node* current_node = root;
 
-	while (!current_node->is_leaf) {
+	while (!current_node->is_leaf || current_node->n_entries == 3) {
 		// splitting while going down
 		if (current_node->n_entries == 3) {
-			current_node = tree_node_split(current_node);
+			current_node = btree_node_split(current_node, btree);
 		}
 		
 		// searching
@@ -198,7 +237,7 @@ enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data) {
 			// can null be here? didn't we create needed subtrees during splitting?
 			// null in subtree can be in leaf only and if it is a leaf
 			// we do not enter this loop
-			if (current_node->keys[0]-> key < key) {
+			if (current_node->keys[0]->key > key) {
 				nullcheck(current_node->subtrees[0], "subtree[0]");
 				current_node = current_node->subtrees[0];
 			} else {
@@ -206,20 +245,23 @@ enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data) {
 				current_node = current_node->subtrees[1];
 			}
 		} else if (current_node->n_entries == 2) {
-			if (current_node->keys[0]->key < key) {
-				nop();
+			if (current_node->keys[0]->key > key) {
+				nullcheck(current_node->subtrees[0], "subtree[0]");
+				current_node = current_node->subtrees[0];
 			} else if (current_node->keys[0]->key == key) {
 				free_z(data);
 				free_z(new_entry);
 				return InsertSameKey;
-			} else if (current_node->keys[1]->key < key) {
-				nop();
+			} else if (current_node->keys[1]->key > key) {
+				nullcheck(current_node->subtrees[1], "subtree[1]");
+				current_node = current_node->subtrees[1];
 			} else if (current_node->keys[1]->key == key) {
 				free_z(data);
 				free_z(new_entry);
 				return InsertSameKey;
 			} else {
-				nop();
+				nullcheck(current_node->subtrees[2], "subtree[2]");
+				current_node = current_node->subtrees[2];
 			}
 		} else {
 			msg_error("Found unsplit node where should not!");
@@ -235,3 +277,5 @@ enum InsertStatus tree_insert(struct Node* root, uint64_t key, char* data) {
 	btree_nonfull_insert(current_node, new_entry);
 	return 0;
 }
+
+
