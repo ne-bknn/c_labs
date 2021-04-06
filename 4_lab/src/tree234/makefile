@@ -25,7 +25,7 @@ build: *.c *.h
 
 .PHONY: clean
 clean:
-	@echo Deleting *.out *.o autotests logs core.* fuzzing/sync/*
+	@echo Deleting *.out *.o autotests logs core.* fuzzing/sync/* *.dot
 	-@rm *.out 2>/dev/null || true
 	-@rm *.o 2>/dev/null || true
 	-@rm test/autotest/autotest.c 2>/dev/null || true

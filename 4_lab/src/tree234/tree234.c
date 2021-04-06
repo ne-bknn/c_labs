@@ -240,6 +240,7 @@ struct BTree* btree_create() {
 	root->parent = NULL;
 	btree->root = root;
 	btree->n_elems = 0;
+	btree->n_saves = 0;
 	return btree;
 }
 
@@ -362,11 +363,11 @@ int btree_internal_write(struct Node* node, FILE *fp, int counter, int parent_in
 		exit(1);
 	}
 	if (node->n_entries == 1) {
-		fprintf(fp, "\ta%03d [shape=record, label=\"{%"PRIu64"}\"];\n", counter, node->keys[0]->key);
+		fprintf(fp, "\ta%03d [shape=record, label=\"%"PRIu64"\"];\n", counter, node->keys[0]->key);
 	} else if (node->n_entries == 2) {
-		fprintf(fp, "\ta%03d [shape=record, label=\"{%"PRIu64"|%"PRIu64"}\"];\n", counter, node->keys[0]->key, node->keys[1]->key);
+		fprintf(fp, "\ta%03d [shape=record, label=\"%"PRIu64"|%"PRIu64"\"];\n", counter, node->keys[0]->key, node->keys[1]->key);
 	} else {
-		fprintf(fp, "\ta%03d [shape=record, label=\"{%"PRIu64"|%"PRIu64"|%"PRIu64"}\"];\n", counter, node->keys[0]->key, node->keys[1]->key, node->keys[2]->key);
+		fprintf(fp, "\ta%03d [shape=record, label=\"%"PRIu64"|%"PRIu64"|%"PRIu64"\"];\n", counter, node->keys[0]->key, node->keys[1]->key, node->keys[2]->key);
 	}
 	if (NULL != node->parent) {
 		fprintf(fp, "\ta%03d -> a%03d;\n", parent_index, counter);
@@ -380,7 +381,7 @@ int btree_internal_write(struct Node* node, FILE *fp, int counter, int parent_in
 }
 
 
-void btree_save(struct BTree*  btree, int index) {
+void btree_save(struct BTree* btree, int index) {
 	FILE *fp;
 	if (index > 1000) {
 		msg_warn("index is greater than 1000, tweak btree_save");
@@ -398,4 +399,122 @@ void btree_save(struct BTree*  btree, int index) {
 	btree_internal_write(btree->root, fp, 0, 0);
 	fprintf(fp, "}");
 	fclose(fp);
+}
+
+// to be used only when traversing down the tree searching for needed node: 
+// we need to merge everything that is naively mergeable
+int btree_node_is_mergeable(struct BTree* btree, struct Node* node) {
+	if (node->n_entries != 1) {
+		return 0;
+	}
+
+	if (node->subtrees[0]->n_entries != 1 || node->subtrees[0]->n_entries != 1) {
+		return 0;
+	}
+
+	return 1;
+}
+
+// can be called on 2-nodes or 3-nodes that are leaves
+// node must contain the key
+void btree_entry_leaf_internal_delete(struct Node* node, uint64_t key) {
+	if (node->n_entries < 2) {
+		msg_error("Trying internal delete on underflowing node!");
+		exit(1);
+	}
+
+	if (!node->is_leaf) {
+		msg_error("Trying internal leaf delete on non-leaf node!");
+		exit(1);
+	}
+
+	if (node->keys[0]->key == key) {
+		free_z(node->keys[0]->data);
+		free_z(node->keys[0]);
+		if (node->n_entries == 3) {
+			node->keys[0] = node->keys[1];
+			node->keys[1] = node->keys[2];
+		} else {
+			node->keys[0] = node->keys[1];
+		}
+	} else if (node->keys[1]->key == key) {
+		free_z(node->keys[1]->data);
+		free_z(node->keys[1]);
+		if (node->n_entries == 3) {
+			node->keys[1] = node->keys[2];
+		}
+	} else if (node->n_entries == 3 && node->keys[2]->key == key) {
+		free_z(node->keys[2]->data);
+		free_z(node->keys[2]);
+	} else {
+		msg_error("Weird error in btree_entry_leaf_internal_delete!");
+		exit(1);
+	}
+
+	node->n_entries -= 1;
+}
+
+// finds greatest elem that is smaller than current one: starting_node should have key in itself
+struct FindInorderResult btree_find_predecessor(struct Node* starting_node, uint64_t key) {
+	struct Node* current_node;
+	if (starting_node->keys[0]->key == key) {
+		nullcheck(starting_node->subtrees, "subtrees in pred");
+		nullcheck(starting_node->subtrees[0], "subtrees[1] in pred");
+		current_node = starting_node->subtrees[0];
+	} else if (starting_node->n_entries > 1 && starting_node->keys[1]->key == key) {
+		nullcheck(starting_node->subtrees, "subtrees in pred");
+		nullcheck(starting_node->subtrees[1], "subtrees[1] in pred");
+		current_node = starting_node->subtrees[1];
+	} else if (starting_node->n_entries > 2 && starting_node->keys[2]->key == key) {
+		nullcheck(starting_node->subtrees, "subtrees in pred");
+		nullcheck(starting_node->subtrees[2], "subtrees[2] in pred");
+	
+		current_node = starting_node->subtrees[2];	
+	} else {
+		msg_error("Could not find key in starting_node in btree_find_predecessor");
+		exit(1);
+	}
+
+	while (1) {
+		if (current_node->is_leaf) {
+			struct FindInorderResult result = {current_node, current_node->n_entries-1};
+			return result;
+		}
+		current_node = current_node->subtrees[current_node->n_subtrees-1];
+		nullcheck(current_node, "current_node in find_predecessor");
+	}
+}
+
+struct FindInorderResult btree_find_successor(struct Node* starting_node, uint64_t key) {
+	struct Node* current_node;
+	if (starting_node->keys[0]->key == key) {
+		nullcheck(starting_node->subtrees, "subtrees in successor");
+		nullcheck(starting_node->subtrees[1], "subtrees[1] in succ");
+		current_node = starting_node->subtrees[1];
+	} else if (starting_node->n_entries > 1 && starting_node->keys[1]->key == key) {
+		nullcheck(starting_node->subtrees, "subtrees in successor");
+		nullcheck(starting_node->subtrees[2], "subtrees[1] in succ");
+		current_node = starting_node->subtrees[2];
+	} else if (starting_node->n_entries > 2 && starting_node->keys[2]->key == key) {
+		nullcheck(starting_node->subtrees, "subtrees in successor");
+		nullcheck(starting_node->subtrees[3], "subtrees[1] in succ");
+		current_node = starting_node->subtrees[3];	
+	} else {
+		msg_error("Could not find key in starting_node in btree_find_successor");
+		exit(1);
+	}
+
+	while (1) {
+		if (current_node->is_leaf) {
+			struct FindInorderResult result = {current_node, current_node->n_entries-1};
+			return result;
+		}
+		current_node = current_node->subtrees[0];
+		nullcheck(current_node, "current_node in succ");
+	}
+}
+
+enum DeleteStatus btree_delete(struct BTree* btree, uint64_t key) {
+
+	return DeleteSuccess;
 }
