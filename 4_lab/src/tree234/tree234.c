@@ -514,7 +514,152 @@ struct FindInorderResult btree_find_successor(struct Node* starting_node, uint64
 	}
 }
 
+enum MergeStatus btree_node_merge(struct BTree* btree, struct Node* node, uint64_t key, int subtree_index) {
+	// new_node is added to the node as a subtree
+	// we can deduce which subtree it is by key index
+	struct Node* new_node = btree_node_create();
+	struct Entry* entry_to_copy = NULL;
+	int index;
+	for (size_t i = 0; i < 3; ++i) {
+		if (node->keys[i]->key == key) {
+			entry_to_copy = node->keys[i];
+			index = i;
+			break;
+		}
+	}
+	
+	// if index == 0, we are overwriting leftmost subtree
+	// if index == 1, we are overwriting 1 subtree
+	// if index == 2, we are overwriting 2 subtree
+
+	if (NULL == entry_to_copy) {
+		return MergeNoSuchKey;
+	}
+
+	if (node->subtrees[index]->n_entries != 0) {
+		msg_error("Asked to merge with non-1-node");
+		exit(1);
+	}
+	// getting entries form 1-nodes
+	struct Node* left_tree = node->subtrees[index];
+	struct Entry* left = left_tree->keys[0];
+
+	if (node->subtrees[index+1]->n_entries != 0) {
+		msg_error("Asked to merge with non-1-node");
+		exit(1);
+	}
+	// getting entries from 1-nodes
+	struct Node* right_tree = node->subtrees[index+1];
+	struct Entry* right = right_tree->keys[0];
+	
+	// created new node with our entries
+	btree_nonfull_insert(new_node, left);
+	btree_nonfull_insert(new_node, entry_to_copy);
+	btree_nonfull_insert(new_node, right);
+
+	// new_node is a merged node now, we need to copy pointers
+	// each of 1-nodes had 2 pointers
+	// we just need to copy left pointers to 0 and 1 and
+	// right pointers to 2 and 3
+	new_node->subtrees[0] = left_tree->subtrees[0];
+	new_node->subtrees[1] = left_tree->subtrees[1];
+	new_node->subtrees[2] = right_tree->subtrees[0];
+	new_node->subtrees[3] = right_tree->subtrees[1];
+
+	if (NULL != left_tree->subtrees[0]) {
+		left_tree->subtrees[0]->parent = new_node;
+	}
+	if (NULL != left_tree->subtrees[1]) {
+		left_tree->subtrees[1]->parent = new_node;
+	}
+	if (NULL != right_tree->subtrees[0]) {
+		right_tree->subtrees[0]->parent = new_node;
+	}
+	if (NULL != right_tree->subtrees[1]) {
+		right_tree->subtrees[1]->parent = new_node;
+	}
+	
+	if (NULL == node->parent && node->n_entries == 1) {
+		btree->root = new_node;
+	} else {
+		// we need to overwrite subtree in node, since it is our parent
+		//node->parent->
+	}
+}
+
+// It is used when we deleting elem from leaf node with 1 entry
+// we need to know the node from which we are deleting and the node from which we are stealing
+void btree_entry_rotation_cw(struct Node* node, struct Node* sibling) {
+
+}
+
+void btree_entry_rotation_ccw(struct Node* node, struct Node* sibling) {
+}
+
+
 enum DeleteStatus btree_delete(struct BTree* btree, uint64_t key) {
+	
+	// step 1 - find the entry to delete
+	// step 2 - if it is a leaf with n_entries >= 2, just delete the elem
+	// step 3 - element is internal node, if left child has at least 2 keys, replace with
+	// inorder predecessor. if right child has at least 2 keys, replace with inorder successor
+	// both children has 2 keys - we merge
+	// we also merging nodes that are 1<-1->1 on our way down using is_able_to_merge routine
+	
+	// travesing the tree searching for node
+	struct Node* current_node = btree->root;
+	int entry_index = -1;
+	while (1) {
+		if (current_node->n_entries == 0) {
+			return DeleteNotFound;
+		}
+
+		if (current_node->keys[0]->key > key) {
+			current_node = current_node->subtrees[0];
+		} else if (current_node->keys[0]->key == key) {
+			entry_index = 0;
+			break;
+		} else if (current_node->n_subtrees > 1 && current_node->keys[1]->key > key) {
+			current_node = current_node->subtrees[1];
+		} else if (current_node->n_subtrees > 1 && current_node->keys[1]->key == key) {
+			entry_index = 1;
+			break;
+		} else if (current_node->n_subtrees > 2 && current_node->keys[2]->key > key) {
+			current_node = current_node->subtrees[2];
+		} else if (current_node->n_subtrees > 2 && current_node->keys[2]->key == key) {
+			entry_index = 2;
+			break;
+		} else {
+			current_node = current_node->subtrees[3];
+		}
+	}
+
+	// now we now that at index index in current_node we have our elem. lets implement our logic
+	if (current_node->is_leaf) {
+		// we have a leaf here, two situations. situation 1 - n_entries 2 or 3, we are just deleting entry
+		// situation 2 - n_entries is 1, we need rotation/merge
+		if (current_node->n_entries > 1) {
+			// easiest situation, just deleting
+			if (current_node->n_entries == 3) {
+				if (entry_index == 0) {
+					current_node->keys[0] = current_node->keys[1];
+					current_node->keys[1] = current_node->keys[2];
+				} else if (entry_index == 1) {
+					current_node->keys[1] = current_node->keys[2];
+				}
+			} else if (current_node->n_entries == 2) {
+				if (entry_index == 0) {
+					current_node->keys[0] = current_node->keys[1];
+				}
+			}
+			current_node->n_entries--;
+		} else {
+			// grustnaya pesnya pro mamu, rotation or merging
+			
+			// checking whether there are siblings with 2 or more keys
+		}
+	} else {
+	}
 
 	return DeleteSuccess;
 }

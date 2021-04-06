@@ -6,7 +6,7 @@ CFLAGS = -std=c99
 CFLAGS += -Wall
 CFLAGS += -Wextra
 CFLAGS += -pedantic
-CFLAGS += -Werror
+#CFLAGS += -Werror
 CFLAGS += -Wmissing-declarations
 CFLAGS += -fstack-protector-all
 
@@ -16,12 +16,17 @@ ASANFLAGS += -fno-omit-frame-pointer
 
 DEBUGFLAGS = -g
 
-default: build
+default: prod 
+
+.PHONY: prod
+prod: 
+	@echo Building
+	@$(CC) $(CFLAGS) $(DEBUGFLAGS) *.c ../tuilib.c -o test.out $(LIBS) 
 
 .PHONY: build
 build: *.c *.h
 	@echo Building
-	@$(CC) $(ASANFLAGS) $(CFLAGS) $(DEBUGFLAGS) *.c ../tuilib.c -o test.out $(LIBS) 
+	@$(CC) $(ASANFLAGS) $(CFLAGS) -Werror $(DEBUGFLAGS) *.c ../tuilib.c -o test.out $(LIBS) 
 
 .PHONY: clean
 clean:

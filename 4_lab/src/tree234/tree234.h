@@ -78,6 +78,11 @@ enum DeleteStatus {
 	DeleteNotFound
 };
 
+enum MergeStatus {
+	MergeSuccess,
+	MergeNoSuchKey
+};
+
 enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t key, char* data);
 struct Node* btree_node_create();
 struct Node* btree_node_split(struct Node* current_node, struct BTree* btree);
