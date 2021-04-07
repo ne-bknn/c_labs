@@ -18,6 +18,7 @@ struct NFInsertStatus {
 struct BTree {
 	struct Node* root;
 	uint64_t n_elems;
+	uint32_t n_saves;
 };
 
 struct Entry {
@@ -53,8 +54,16 @@ static inline void nullcheck(void* ptr, const char* name) {
 	}
 }
 
-void tree_left_steal();
-void tree_right_steal();
+struct FindInorderResult {
+	// pointer to a node with predecessor/successor
+	struct Node* node;
+	// index of an entry in a node with predecessor/successor
+	uint8_t index;
+};
+
+struct FindInorderResult btree_find_predecessor(struct Node* starting_node, uint64_t key);
+struct FindInorderResult btree_find_successor(struct Node* starting_node, uint64_t key);
+
 void tree_merge();
 void tree_shrink();
 
@@ -64,11 +73,21 @@ enum InsertStatus {
 	InsertFatal
 };
 
+enum DeleteStatus {
+	DeleteSuccess,
+	DeleteNotFound
+};
+
+enum MergeStatus {
+	MergeSuccess,
+	MergeNoSuchKey
+};
+
 enum InsertStatus btree_insert(struct Node* root, struct BTree* btree, uint64_t key, char* data);
 struct Node* btree_node_create();
 struct Node* btree_node_split(struct Node* current_node, struct BTree* btree);
 struct Entry* btree_search(struct BTree* btree, uint64_t key);
 void btree_entry_print(struct Entry* entry);
-void tree_delete();
-void tree_save();
+enum DeleteStatus btree_delete(struct BTree* btree, uint64_t key);
+void btree_save(struct BTree *btree, int index);
 struct BTree* btree_create();
