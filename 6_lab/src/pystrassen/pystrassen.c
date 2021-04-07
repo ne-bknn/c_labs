@@ -1,4 +1,8 @@
+#if defined(__clang_)
 #include <Python.h>
+#else
+#include </usr/include/python3.9/Python.h>
+#endif
 
 static PyObject* helloworld(PyObject* self) {
    return Py_BuildValue("s", "Hello, Python extensions!!");
@@ -21,6 +25,6 @@ static struct PyModuleDef Helloworld = {
 	module_methods
 };
 
-PyMODINIT_FUNC PyInit_helloworld(void) {
+PyMODINIT_FUNC PyInit_pystrassen(void) {
 	return PyModule_Create(&Helloworld);
 }
