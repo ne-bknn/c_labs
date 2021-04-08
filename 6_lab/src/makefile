@@ -21,8 +21,8 @@ VECTORFLAGS += -Rpass-missed="loop|vect"
 VECTORFLAGS += -Rpass-analysis="loop|vect"
 
 OPTFLAGS = -ffast-math
-OPTFLAGS += -march=haswell
-OPTFLAGS += -mtune=haswell
+OPTFLAGS += -march=native
+OPTFLAGS += -mtune=native
 OPTFLAGS += -O3
 OPTFLAGS += -Ofast
 
