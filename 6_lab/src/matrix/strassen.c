@@ -1,5 +1,8 @@
 #include "strassen.h"
 
+#define BLK_SIZE 128
+#define min(a,b) (((a)<(b))?(a):(b))
+
 // Used to multiply two matrices with dims <= 4 (will move to 16 after debugging, maybe)
 #pragma clang optimize off
 struct Matrix* matrix_naive_multiply(struct Matrix* restrict a, struct Matrix* restrict b) {
@@ -19,14 +22,14 @@ struct Matrix* matrix_naive_multiply(struct Matrix* restrict a, struct Matrix* r
 }
 
 // An attempt to optimize multiplication for vector operations
+// still not vectorized enough
 #pragma clang optimize on
-struct Matrix* matrix_vecopt_multiply(double* restrict a, double* restrict b, int an, int am, int bn, int bm) {
+struct Matrix* matrix_vecopt_multiply(const double* restrict a, const double* restrict b, int an, int am, int bn, int bm) {
 	if (am != bn) {
 		return NULL;
 	}
 
 	struct Matrix* restrict result = matrix_create(an, bm);
-	//double* restrict elems = result->elems;
 	int i1, i2, i3;
 	for (int i = 0; i < an; ++i) {
 		for (int j = 0; j < bm; ++j) {
@@ -41,6 +44,22 @@ struct Matrix* matrix_vecopt_multiply(double* restrict a, double* restrict b, in
 		}
 	}
 	return result;
+}
+
+void matrix_add(double* restrict a, const double* restrict b, int n, int m) {
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < m; ++j) {
+			a[i*m+j] += b[i*m+j];
+		}
+	}
+}
+
+void matrix_sub(double* restrict a, const double* restrict b, int n, int m) {
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < m; ++j) {
+			a[i*m+j] += b[i*m+j];
+		}
+	}
 }
 
 #pragma clang optimize off
