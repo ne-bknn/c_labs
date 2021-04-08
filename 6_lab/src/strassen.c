@@ -48,7 +48,7 @@ struct Matrix* matrix_add(const struct Matrix* restrict a, const struct Matrix* 
 	const struct Matrix* restrict res = matrix_create(a->n, a->m);
 	for (int i = 0; i < a->n; ++i) {
 		for (int j = 0; j < a->m; ++j) {
-			res->elems[i*a->m+j] += b->elems[i*a->m+j] + a->elems[i*a->m+j];
+			res->elems[i*a->m+j] = b->elems[i*a->m+j] + a->elems[i*a->m+j];
 		}
 	}
 	return res;
@@ -59,7 +59,7 @@ struct Matrix* matrix_sub(const struct Matrix* restrict a, const struct Matrix* 
 	const struct Matrix* restrict res = matrix_create(a->n, a->m);
 	for (int i = 0; i < a->n; ++i) {
 		for (int j = 0; j < a->m; ++j) {
-			res->elems[i*a->m+j] += - b->elems[i*a->m+j] - a->elems[i*a->m+j];
+			res->elems[i*a->m+j] = -b->elems[i*a->m+j] + a->elems[i*a->m+j];
 		}
 	}
 	return res;
@@ -165,7 +165,7 @@ void matrix_pad(struct Matrix* a, int k) {
 
 struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b) {
 	print_debug("Entered strassen multiply with size of block %lu", a->n);
-	if (a->n <= 2) {
+	if (a->n <= 32) {
 		struct Matrix* res = matrix_vecopt_multiply(a->elems, b->elems, a->n, a->m, b->n, b->m);
 		return res;
 	}
@@ -184,14 +184,14 @@ struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b) {
 
 	for (int i = 0; i < k; ++i) {
 		for (int j = 0; j < k; ++j) {
-			A11->elems[i*k+j] = a->elems[i*k+j];
-			A12->elems[i*k+j] = a->elems[i*k + k + j];
-			A21->elems[i*k+j] = a->elems[(k+i)*k+j];
-			A22->elems[i*k+j] = a->elems[(k+i)*k+k+j];
-			B11->elems[i*k+j] = b->elems[i*k+j];
-			B12->elems[i*k+j] = b->elems[i*k + k + j];
-			B21->elems[i*k+j] = b->elems[(k+i)*k+j];
-			B22->elems[i*k+j] = b->elems[(k+i)*k+k+j];
+			A11->elems[i*k+j] = a->elems[i*a->m+j];
+			A12->elems[i*k+j] = a->elems[i*a->m + k + j];
+			A21->elems[i*k+j] = a->elems[(k+i)*a->m+j];
+			A22->elems[i*k+j] = a->elems[(k+i)*a->m+k+j];
+			B11->elems[i*k+j] = b->elems[i*a->m+j];
+			B12->elems[i*k+j] = b->elems[i*a->m + k + j];
+			B21->elems[i*k+j] = b->elems[(k+i)*a->m+j];
+			B22->elems[i*k+j] = b->elems[(k+i)*a->m+k+j];
 		}
 	}
 	
@@ -239,10 +239,10 @@ struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b) {
 
 	for (int i = 0; i < k; ++i) {
 		for (int j = 0; j < k; ++j) {
-			res->elems[i*k+j] = C11->elems[i*k+j];
-			res->elems[i*k+j+k] = C12->elems[i*k+j];
-			res->elems[(k+i)*k+j] = C21->elems[i*k+j];
-			res->elems[(k+i)*k+k+j] = C22->elems[i*k+j];
+			res->elems[i*a->n+j] = C11->elems[i*k+j];
+			res->elems[i*a->n+j+k] = C12->elems[i*k+j];
+			res->elems[(k+i)*a->n+j] = C21->elems[i*k+j];
+			res->elems[(k+i)*a->n+k+j] = C22->elems[i*k+j];
 		}
 	}
 
