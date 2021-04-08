@@ -40,7 +40,7 @@ default: debug
 .PHONY: debug
 debug: src/*/*.c src/*/*.h
 	@echo 'Building for debug'
-	@$(CC) $(CFLAGS) $(ASANFLAGS) $(DEBUGFLAGS) $(VECTORFLAGS) src/matrix/strassen.c src/matrix/test_strassen.c -o strassen.out $(LIBS)
+	$(CC) $(CFLAGS) $(ASANFLAGS) $(DEBUGFLAGS) $(VECTORFLAGS) src/matrix/strassen.c src/matrix/test_strassen.c -o strassen.out $(LIBS)
 
 .PHONY: build
 build: src/*/*.c src/*/*.h
