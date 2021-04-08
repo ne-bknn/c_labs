@@ -21,10 +21,16 @@ VECTORFLAGS += -Rpass-missed="loop|vect"
 VECTORFLAGS += -Rpass-analysis="loop|vect"
 
 OPTFLAGS = -ffast-math
-OPTFLAGS += -march=native
+OPTFLAGS += -march=haswell
 OPTFLAGS += -O3
+OPTFLAGS += -Ofast
 
-UNSAFEOPTS = -mllvm -unroll-allow-partial -mllvm -unroll-runtime -funsafe-math-optimizations
+VECTFORCE = -mllvm -force-vector-width=8
+VECTFORCE += -mllvm -force-vector-interleave=4
+
+UNSAFEOPTS = -mllvm -unroll-allow-partial
+UNSAFEOPTS += -mllvm -unroll-runtime 
+UNSAFEOPTS += -funsafe-math-optimizations
 
 default: debug build
 
@@ -32,7 +38,11 @@ debug: strassen.c test_strassen.c
 	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) $(ASANFLAGS) strassen.c test_strassen.c -o debug.out $(LIBS)
 
 build: strassen.c test_strassen.c
-	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(UNSAFEOPTS) strassen.c test_strassen.c -o bench.out $(LIBS)
+	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) strassen.c test_strassen.c -o bench.out $(LIBS)
+
+bytecode: strassen.c test_strassen.c
+	$(CC) -std=c99 $(VECTORFLAGS) $(OPTFLAGS) -emit-llvm strassen.c -S
+
 
 clean:
 	rm *.out

@@ -26,6 +26,6 @@ static inline double* row_create(int64_t m) {
 int rnd_int();
 struct Matrix* matrix_naive_multiply(struct Matrix* a, struct Matrix* b);
 struct Matrix* matrix_generate(int64_t n, int64_t m);
-struct Matrix* matrix_vecopt_multiply(double* a, double *b, int64_t an, int64_t am, int64_t bn, int64_t bm);
+struct Matrix* matrix_vecopt_multiply(double* a, double *b, int an, int am, int bn, int bm);
 void matrix_print(struct Matrix* matrix);
 void matrix_free(struct Matrix* matrix);

@@ -1,13 +1,13 @@
 #include "strassen.h"
 
 // Used to multiply two matrices with dims <= 4 (will move to 16 after debugging, maybe)
+#pragma clang optimize off
 struct Matrix* matrix_naive_multiply(struct Matrix* restrict a, struct Matrix* restrict b) {
 	if (a->m != b->n) {
 		return NULL;
 	}
 
 	struct Matrix* restrict result = matrix_create(a->n, b->m);
-
 	for (int i = 0; i < a->n; ++i) {
 		for (int j = 0; j < b->m; ++j) {
 			for (int k = 0; k < b->n; ++k) {
@@ -19,31 +19,41 @@ struct Matrix* matrix_naive_multiply(struct Matrix* restrict a, struct Matrix* r
 }
 
 // An attempt to optimize multiplication for vector operations
-struct Matrix* matrix_vecopt_multiply(double* restrict a, double* restrict b, int64_t an, int64_t am, int64_t bn, int64_t bm) {
+#pragma clang optimize on
+struct Matrix* matrix_vecopt_multiply(double* restrict a, double* restrict b, int an, int am, int bn, int bm) {
 	if (am != bn) {
 		return NULL;
 	}
 
 	struct Matrix* restrict result = matrix_create(an, bm);
-
+	//double* restrict elems = result->elems;
+	int i1, i2, i3;
 	for (int i = 0; i < an; ++i) {
 		for (int j = 0; j < bm; ++j) {
+			#pragma clang loop vectorize(enable)
+			#pragma clang loop interleave(enable)
 			for (int k = 0; k < bn; ++k) {
-				result->elems[i*bm + j] += (a[i*am+k])*(b[k*bm+j]);
+				i1 = i*bm+j;
+				i2 = i*am+k;
+				i3 = k*bm+j;
+				result->elems[i1] += a[i2]*b[i3];
 			}
 		}
 	}
 	return result;
 }
 
+#pragma clang optimize off
 double rnd_double() {
 	return (double)(rand()%1000)/1000;
 }
 
+#pragma clang optimize off
 int rnd_int() {
 	return rand()%40;
 }
 
+#pragma clang optimize off
 struct Matrix* matrix_generate(int64_t n, int64_t m) {
 	struct Matrix* matrix = matrix_create(n, m);
 	for (int i = 0; i < matrix->n; ++i) {
@@ -55,6 +65,7 @@ struct Matrix* matrix_generate(int64_t n, int64_t m) {
 	return matrix;
 }
 
+#pragma clang optimize off
 void matrix_print(struct Matrix* matrix) {
 	printf("[");
 	for (int i = 0; i < matrix->n; ++i) {
