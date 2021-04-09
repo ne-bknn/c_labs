@@ -1,4 +1,5 @@
 LIBS = -lm
+LIBS += -lpthread
 
 CC = clang
 
@@ -16,9 +17,9 @@ ASANFLAGS += -fno-omit-frame-pointer
 DEBUGFLAGS = -g
 
 VECTORFLAGS = -fopenmp-simd
-VECTORFLAGS += -Rpass="loop|vect"
-VECTORFLAGS += -Rpass-missed="loop|vect"
-VECTORFLAGS += -Rpass-analysis="loop|vect"
+#VECTORFLAGS += -Rpass="loop|vect"
+#VECTORFLAGS += -Rpass-missed="loop|vect"
+#VECTORFLAGS += -Rpass-analysis="loop|vect"
 
 OPTFLAGS = -ffast-math
 OPTFLAGS += -march=native

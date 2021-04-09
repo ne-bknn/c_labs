@@ -1,5 +1,8 @@
 #include "strassen.h"
 #include <stdbool.h>
+#include <pthread.h>
+
+int parallelized = false;
 
 // Used to multiply two matrices with dims <= 4 (will move to 16 after debugging, maybe)
 #pragma clang optimize off
@@ -80,7 +83,7 @@ struct Matrix* matrix_generate(int64_t n, int64_t m) {
 	const struct Matrix* matrix = matrix_create(n, m);
 	for (int i = 0; i < matrix->n; ++i) {
 		for (int j = 0; j < matrix->m; ++j) {
-			matrix->elems[i*m+j] = rnd_double();
+			matrix->elems[i*m+j] = rnd_int();
 		}
 	}
 	return matrix;
@@ -163,9 +166,16 @@ void matrix_pad(struct Matrix* a, int k) {
 	a->m = k;
 }
 
+void* matrix_strassen_wrapper(void* a) {
+	struct Tuple* b = (struct Tuple*)a;
+	void* ret = (void*)matrix_strassen_multiply(b->a, b->b);
+	pthread_exit(ret);
+}
+
 struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b) {
+	pthread_t threads[7];
 	print_debug("Entered strassen multiply with size of block %lu", a->n);
-	if (a->n <= 32) {
+	if (a->n <= 64) {
 		struct Matrix* res = matrix_vecopt_multiply(a->elems, b->elems, a->n, a->m, b->n, b->m);
 		return res;
 	}
@@ -197,43 +207,110 @@ struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b) {
 	
 	struct Matrix *temp1, *temp2;
 	
+	bool local_parallelized = false;
+	if (!parallelized) {
+		local_parallelized = true;
+		parallelized = true;
+	}
+
 	temp1 = matrix_sub(B12, B22);
-	struct Matrix* P1 = matrix_strassen_multiply(A11, temp1);
+	struct Matrix* P1;
+	if (!local_parallelized) {
+ 		P1 = matrix_strassen_multiply(A11, temp1);
+	} else {
+		struct Tuple k = {A11, temp1};
+		pthread_create(&threads[0], NULL, matrix_strassen_wrapper, (void*)&k);
+	}
 	matrix_free(temp1);
 	temp1 = matrix_add(A11, A12);
-	struct Matrix* P2 = matrix_strassen_multiply(temp1, B22);
+	struct Matrix* P2;
+	if (!local_parallelized) {
+		P2 = matrix_strassen_multiply(temp1, B22);
+	} else {
+		struct Tuple k = {temp1, B22};
+		pthread_create(&threads[1], NULL, matrix_strassen_wrapper, (void*)&k);
+	}
 	matrix_free(temp1);
 	temp1 = matrix_add(A21, A22);
-	struct Matrix* P3 = matrix_strassen_multiply(temp1, B11);
+	struct Matrix* P3;
+	if (!local_parallelized) {
+		P3 = matrix_strassen_multiply(temp1, B11);
+	} else {
+		struct Tuple k = {temp1, B11};
+		pthread_create(&threads[2], NULL, matrix_strassen_wrapper, (void*)&k);
+	}
 	matrix_free(temp1);
 	temp1 = matrix_sub(B21, B11);	
-	struct Matrix* P4 = matrix_strassen_multiply(A22, temp1);
+	struct Matrix* P4;
+	if (!local_parallelized) {
+		P4 = matrix_strassen_multiply(A22, temp1);
+	} else {
+		struct Tuple k = {A22, temp1};
+		pthread_create(&threads[3], NULL, matrix_strassen_wrapper, (void*)&k);
+	}
 	matrix_free(temp1);
 	temp1 = matrix_add(A11, A22);
 	temp2 = matrix_add(B11, B22);
-	struct Matrix* P5 = matrix_strassen_multiply(temp1, temp2);
+	struct Matrix* P5;
+	if (!local_parallelized) {
+		P5 = matrix_strassen_multiply(temp1, temp2);
+	} else {
+		struct Tuple k = {temp1, temp2};
+		pthread_create(&threads[4], NULL, matrix_strassen_wrapper, (void*)&k);
+	}
 	matrix_free(temp1);
 	matrix_free(temp2);
 	temp1 = matrix_sub(A12, A22);
 	temp2 = matrix_add(B21, B22);
-	struct Matrix* P6 = matrix_strassen_multiply(temp1, temp2);
+	struct Matrix* P6;
+	if (!local_parallelized) {
+		P6 = matrix_strassen_multiply(temp1, temp2);
+	} else {
+		struct Tuple k = {temp1, temp2};
+		pthread_create(&threads[5], NULL, matrix_strassen_wrapper, (void*)&k);
+	}
 	matrix_free(temp1);
 	matrix_free(temp2);
 	temp1 = matrix_sub(A11, A21);
 	temp2 = matrix_add(B11, B12);
-	struct Matrix* P7 = matrix_strassen_multiply(temp1, temp2);
+	struct Matrix* P7;
+	if (!local_parallelized) {
+		P7 = matrix_strassen_multiply(temp1, temp2);
+	} else {
+		struct Tuple k = {temp1, temp2};
+		pthread_create(&threads[6], NULL, matrix_strassen_wrapper, (void*)&k);
+	}
 	matrix_free(temp1);
 	matrix_free(temp2);
+	if (local_parallelized) {
+		pthread_join(threads[4], (void**)&P5);
+		pthread_join(threads[3], (void**)&P4);
+	}
 	temp1 = matrix_add(P5, P4);
+	if (local_parallelized) {
+		pthread_join(threads[5], (void**)&P6);
+	}
 	temp2 = matrix_add(temp1, P6);
 	matrix_free(temp1);
+	if (local_parallelized) {
+		pthread_join(threads[1], (void**)&P2);
+	}
 	struct Matrix* C11 = matrix_sub(temp2, P2);
 	matrix_free(temp2);
+	if (local_parallelized) {
+		pthread_join(threads[0], (void**)&P1);
+	}
 	struct Matrix* C12 = matrix_add(P1, P2);
+	if (local_parallelized) {
+		pthread_join(threads[2], (void**)&P3);
+	}
 	struct Matrix* C21 = matrix_add(P3, P4);
 	temp1 = matrix_add(P5, P1);
 	temp2 = matrix_sub(temp1, P3);
 	matrix_free(temp1);
+	if (local_parallelized) {
+		pthread_join(threads[6], (void**)&P7);
+	}
 	struct Matrix* C22 = matrix_sub(temp2, P7);
 	matrix_free(temp2);
 

@@ -2,6 +2,9 @@
 #include "utils.h"
 #include <stdbool.h>
 
+#ifndef STRASSEN_PARALLEL_H
+#define STRASSEN_PARALLEL_H
+
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 struct Matrix {
@@ -10,6 +13,11 @@ struct Matrix {
 	int64_t n;
 	// m columns
 	int64_t m;
+};
+
+struct Tuple {
+	struct Matrix* a;
+	struct Matrix* b;
 };
 
 // n rows, m columns
@@ -42,3 +50,5 @@ struct Matrix* matrix_add(const struct Matrix* restrict a, const struct Matrix* 
 struct Matrix* matrix_sub(const struct Matrix* restrict a, const struct Matrix* restrict b);
 void matrix_pad(struct Matrix* a, int k);
 struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b);
+
+#endif
