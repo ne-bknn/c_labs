@@ -19,6 +19,12 @@ int main() {
 	printf("Naively multiplied:\n");
 	matrix_print(r);
 	matrix_free(r);
+
+	const int k1 = padding_size(a->n, a->m);
+	const int k2 = padding_size(b->n, b->m);
+	const int k = MAX(k1, k2);
+	matrix_pad(b, k);
+	matrix_pad(a, k);
 	r = matrix_strassen_multiply(a, b);
 	printf("==============================================\n");
 	printf("Strassen multiplied:\n");

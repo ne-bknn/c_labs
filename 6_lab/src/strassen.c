@@ -165,7 +165,7 @@ void matrix_pad(struct Matrix* a, int k) {
 
 struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b) {
 	print_debug("Entered strassen multiply with size of block %lu", a->n);
-	if (a->n <= 8) {
+	if (a->n <= 64) {
 		struct Matrix* res = matrix_vecopt_multiply(a->elems, b->elems, a->n, a->m, b->n, b->m);
 		return res;
 	}

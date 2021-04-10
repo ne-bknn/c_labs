@@ -45,8 +45,8 @@ debug: src/strassen.c src/strassen_multithreaded.c src/test_strassen.c
 
 .PHONY: build
 build: src/strassen.c src/strassen_multithreaded.c src/test_strassen.c
-	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) $(ASANFLAGS) src/strassen.c src/bench_strassen.c -o bench_vanilla.out $(LIBS)
-	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) $(ASANFLAGS) src/strassen_multithreaded.c src/bench_strassen.c -o bench_pthread.out $(LIBS)
+	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) src/strassen.c src/bench_strassen.c -o bench_vanilla.out $(LIBS)
+	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) src/strassen_multithreaded.c src/bench_strassen.c -o bench_pthread.out $(LIBS)
 
 	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) $(ASANFLAGS) src/strassen.c src/test_strassen.c -o test_vanilla.out $(LIBS)
 	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) $(ASANFLAGS) src/strassen_multithreaded.c src/test_strassen.c -o test_pthread.out $(LIBS)

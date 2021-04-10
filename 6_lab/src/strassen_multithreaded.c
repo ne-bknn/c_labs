@@ -87,7 +87,7 @@ struct Matrix* matrix_generate(int64_t n, int64_t m) {
 	const struct Matrix* matrix = matrix_create(n, m);
 	for (int i = 0; i < matrix->n; ++i) {
 		for (int j = 0; j < matrix->m; ++j) {
-			matrix->elems[i*m+j] = rnd_int();
+			matrix->elems[i*m+j] = rnd_double();
 		}
 	}
 	return matrix;
@@ -179,7 +179,7 @@ void* matrix_strassen_wrapper(void* a) {
 struct Matrix* matrix_strassen_multiply(struct Matrix *a, struct Matrix *b) {
 	pthread_t threads[7];
 	print_debug("Entered strassen multiply with size of block %lu", a->n);
-	if (a->n <= 2) {
+	if (a->n <= 64) {
 		struct Matrix* res = matrix_vecopt_multiply(a->elems, b->elems, a->n, a->m, b->n, b->m);
 		return res;
 	}
