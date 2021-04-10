@@ -9,6 +9,7 @@ CFLAGS += -Wextra
 CFLAGS += -pedantic
 CFLAGS += -Wmissing-declarations
 CFLAGS += -fstack-protector-all
+CFLAGS += -D_POSIX_C_SOURCE=199309L
 
 ASANFLAGS = -fsanitize=address
 ASANFLAGS += -fno-common
@@ -40,7 +41,7 @@ debug: strassen.c test_strassen.c
 	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) $(ASANFLAGS) strassen.c test_strassen.c -o debug.out $(LIBS)
 
 build: strassen.c test_strassen.c
-	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) strassen.c test_strassen.c -o bench.out $(LIBS)
+	$(CC) $(CFLAGS) $(VECTORFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) strassen.c test_strassen.c -o bench.out $(LIBS)
 
 bytecode: strassen.c test_strassen.c
 	$(CC) -std=c99 $(VECTORFLAGS) $(OPTFLAGS) -emit-llvm strassen.c -S
