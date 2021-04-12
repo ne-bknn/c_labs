@@ -166,22 +166,30 @@ static struct LLRBNode *tree_internal_red_to_right(struct LLRBNode *node) {
 	return (node);
 }
 
-static struct LLRBNode *tree_remove_min(struct LLRBNode *node) {
+static struct LLRBNode *tree_remove_min(struct LLRBNode *node, struct LLRBNode* parent) {
 	if (!node) {
 		return ((struct LLRBNode *)NULL);
 	}
 	if (!node->left) {
 		free(node);
+		if (parent && node == parent->left) {
+			parent->left = NULL;
+		} else if (parent && node == parent->right) {
+			parent->right = NULL;
+		} else {
+			msg_error("Weird error..");
+			exit(1);
+		}
 		return ((struct LLRBNode *)NULL);
 	}
 	if (!is_red(node->left) && !is_red(node->left->left)) {
 		node = tree_internal_red_to_left(node);
 	}
-	node->left = tree_remove_min(node->left);
+	node->left = tree_remove_min(node->left, node);
 	return (tree_fixup(node));
 }
 
-static struct LLRBNode *tree_internal_remove(struct LLRBNode *node, t_key key) {
+static struct LLRBNode *tree_internal_remove(struct LLRBNode *node, t_key key, struct LLRBNode *parent) {
 	struct LLRBNode *tmp;
 
 	if (!node) {
@@ -193,7 +201,7 @@ static struct LLRBNode *tree_internal_remove(struct LLRBNode *node, t_key key) {
 			if (!is_red(node->left) && !is_red(node->left->left)) {
 				node = tree_internal_red_to_left(node);
 			}
-			node->left = tree_node_remove(node->left, key);
+			node->left = tree_node_remove(node->left, key, node);
 		}
 	} else {
 		if (is_red(node->left)) {
@@ -201,6 +209,14 @@ static struct LLRBNode *tree_internal_remove(struct LLRBNode *node, t_key key) {
 		}
 		if (!tree_key_comparator(key, node->key) && !node->right) {
 			free(node);
+			if (parent && parent->left == node) {
+				parent->left = NULL;
+			} else if (parent && parent->right == node) {
+				parent->right = NULL;
+			} else if (parent) {
+				msg_error("Could not determine node's position in parent");
+				exit(1);
+			}
 			return ((struct LLRBNode *)0);
 		}
 		if (node->right) {
@@ -211,17 +227,17 @@ static struct LLRBNode *tree_internal_remove(struct LLRBNode *node, t_key key) {
 				tmp = tree_get_min(node->right);
 				node->key = tmp->key;
 				node->value = tmp->value;
-				node->right = tree_remove_min(node->right);
+				node->right = tree_remove_min(node->right, node);
 			} else {
-				node->right = tree_node_remove(node->right, key);
+				node->right = tree_node_remove(node->right, key, node);
 			}
 		}
 	}
 	return (tree_fixup(node));
 }
 
-struct LLRBNode *tree_node_remove(struct LLRBNode *node, t_key key) {
-	node = tree_internal_remove(node, key);
+struct LLRBNode *tree_node_remove(struct LLRBNode *node, t_key key, struct LLRBNode *parent) {
+	node = tree_internal_remove(node, key, parent);
 	if (node) {
 		node->color = black;
 	}

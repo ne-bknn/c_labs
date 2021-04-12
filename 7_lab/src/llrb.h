@@ -30,7 +30,7 @@ struct LLRBNode {
 	struct LLRBNode *right;
 };
 
-struct LLRBNode *tree_node_remove(struct LLRBNode *node, t_key key);
+struct LLRBNode *tree_node_remove(struct LLRBNode *node, t_key key, struct LLRBNode *parent);
 struct LLRBNode *tree_create_node(t_key key, t_value value);
 // unsigned int	get_size(struct LLRBNode *node, t_key key);
 t_value tree_get(struct LLRBNode *root, t_key key);

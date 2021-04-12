@@ -14,7 +14,7 @@ void tuilib_llrb_delete(void **callback_data, void* main_structure) {
 	struct LLRB *tree = (struct LLRB*)main_structure;
 	struct LLRBNode *root = tree->root;
 	t_key *key = (t_key*)callback_data[0];
-	tree_node_remove(root, *key);
+	tree_node_remove(root, *key, NULL);
 }
 
 void tuilib_llrb_save(void **callback_data, void* main_structure) {
