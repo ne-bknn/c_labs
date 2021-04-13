@@ -58,3 +58,4 @@ logs/
 tags
 .gdb_history
 tests/
+*.dot
